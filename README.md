@@ -6,7 +6,7 @@ Dynamic Framework is an open-source project aiming to create a comprehensive ser
 
 Dynamic applications have the potential to revolutionize the way we interact with software, making it more intuitive and responsive. By providing a robust and easy-to-use framework, we hope to accelerate the development of dynamic applications and advance the field of natural language processing.
 
-### **Why We're Building the Dynamic Framework**
+### **Why**
 
 As technology evolves, user experiences must adapt and improve. Chat-based interfaces have made strides in recent years, offering more natural and conversational interactions with software. However, they still fall short of delivering the optimal user experience. This is where UIs come in – they were designed to provide a higher level of abstraction and guidance for users, enabling them to achieve their goals more efficiently.
 
@@ -24,14 +24,15 @@ The Dynamic Framework offers a unified solution for developers building dynamic 
 
 ### **Key Features**
 
-- Seamless integration with LLM tools like LangChain, Pinecone, and GPT-4
+- Seamless integration with LLM tools like LangChain, VectorDBs and OpenAI
 - Dynamic request handling, routing, and context-aware processing
 - Chain execution, agent-based routing, and automatic data contexts
 - Metrics, observability, and insights into performance, failures, and bottlenecks
-- Queue management with built-in rate limits for optimal LLM utilization
-- Cost management with built-in rate limits for external services
-- Support for multiple response types, including React, JSON, and Text
-- Versioning for dynamic application development and effortless deployment
+- Queue management with rate limits for optimal LLM utilization
+- Cost rate limits for external services (openai, pinecone)
+- Response handling: React, JSON, and Text
+- Integrated real time protocol handling
+- Client Side SDKs
 
 ### **Core Components**
 
