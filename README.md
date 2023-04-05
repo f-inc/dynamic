@@ -45,7 +45,7 @@ The Dynamic Framework combines several core components to deliver a comprehensiv
 
 By providing a unified platform for developing dynamic applications, the Dynamic Framework eliminates the need for developers to stitch together disparate tools and services, allowing them to concentrate on building personalized, adaptive experiences that delight users and redefine the future of human-computer interaction.
 
-[Technical Architecture Thoughts](https://www.notion.so/Technical-Architecture-Thoughts-bf4646f87cdd4d11aaf11738453bcdf3)
+[Technical Architecture Thoughts](https://github.com/f-inc/dynamic/blob/main/docs/technical-arch.md)
 
 ## **Contributing**
 
