@@ -1,4 +1,4 @@
 from dynamic import start_server
 
 if __name__ == "__main__":
-    start_server()
+    start_server(routes={})
