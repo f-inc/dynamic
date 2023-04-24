@@ -7,6 +7,10 @@ import os
 import uuid
 import orjson
 import traceback
+import logging
+from langchain.chains.base import Chain
+from langchain.agents import Agent
+
 
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -29,9 +33,12 @@ class Server:
     routes = {}
 
     def __init__(self, routes, host="0.0.0.0", port=8000, static_dir=None):
-        self.routes = routes
         self.host = host
         self.port = port
+
+        for route in routes:
+            print(f"Adding route {route}")
+            self.add_route(route, routes[route])
 
         self.app = FastAPI()
         # Enable CORS for your frontend domain
@@ -44,8 +51,17 @@ class Server:
         )
 
         if static_dir:
-            self.app.mount("/", StaticFiles(directory=static_dir), name="static")
-            # go through the static directory and add specific routes
+            logging.info(f"Adding static dir {static_dir}")
+            full_path = "{}/{}".format(
+                os.path.dirname(os.path.realpath(static_dir)), static_dir
+            )
+            logging.info(f"Adding static dir {full_path}")
+            self.app.mount(
+                "/",
+                StaticFiles(directory=full_path),
+                name="static",
+            )
+            self.app.add_route("/", FileResponse("{}/index.html".format(full_path)))
         else:
             self.app.mount(
                 "/static",
@@ -58,42 +74,81 @@ class Server:
 
         self.app.websocket("/ws")(self.websocket_handler)
 
+    def add_route(self, route, func):
+        # check route intance type
+        if isinstance(func, Chain):
+            self.routes[route] = {"func": func, "type": "chain"}
+        elif isinstance(func, Agent):
+            self.routes[route] = {"func": func, "type": "agent"}
+        elif callable(func):
+            self.routes[route] = {"func": func, "type": "handler"}
+        else:
+            logging.warning(f"Route {route} is not a valid type")
+
     def start(self):
-        print(f"Starting server on host:port {self.host}:{self.port}")
-        uvicorn.run(self.app, host=self.host, port=self.port)
+        logging.info(f"Starting server on host:port {self.host}:{self.port}")
+        uvicorn.run(self.app, host=self.host, port=self.port, log_level="info")
 
     async def websocket_handler(self, websocket: WebSocket):
         def handle_msg(route, data):
-            print(f"Processing handler message for route {route}")
-            chain = self.routes[route]
-            return chain.handle_msg(data)
+            logging.info(f"Processing handler message for route {route} data {data}")
+            if route not in self.routes:
+                logging.error(f"Route {route} not found")
+                return error_response(f"Route {route} not found")
+            try:
+                chain = self.routes[route]
+                if chain["type"] == "chain":
+                    return chain["func"].run(data)
+                elif chain["type"] == "agent":
+                    return chain["func"].run(data)
+                elif chain["type"] == "handler":
+                    return chain["func"](data)
+                else:
+                    return error_response(f"Route {route} not found")
+            except ValueError as e:
+                logging.info(f"Error processing handler message for route {route}")
+                traceback.print_exc()
+                return error_response(f"Can't handle message for route {route}")
+            except Exception as e:
+                logging.info(f"Error processing handler message for route {route}")
+                traceback.print_exc()
+                return error_response(f"Can't handle message for route {route}")
+
+        async def send_msg(msg, original_msg):
+            logging.info(f"Sending message {msg}")
+            response = {
+                "route": route,
+                "message_id": original_msg["message_id"],
+                "data": msg,
+            }
+            await websocket.send_text(orjson.dumps(response).decode("utf-8"))
 
         await websocket.accept()
         while True:
             try:
-                data = await websocket.receive_text()
+                msg = await websocket.receive_text()
                 message_id = str(uuid.uuid4())
 
-                parsed_data = parse_json_string(data)
-                parsed_data["message_id"] = message_id
-                print(f"Received message {parsed_data}")
+                parsed_msg = parse_json_string(msg)
+                parsed_msg["message_id"] = message_id
+                logging.info(f"Received message {parsed_msg}")
 
-                route = parsed_data["route"]
+                route = parsed_msg["route"]
                 if route in self.routes:
-                    print(f"Found handler for route {route}")
-                    response = handle_msg(route, parsed_data)
-                    await websocket.send_text(orjson.dumps(response).decode("utf-8"))
+                    logging.info(f"Found handler for route {route}")
+                    response = handle_msg(route, parsed_msg.get("data", {}))
+                    await send_msg(response, parsed_msg)
                 else:
-                    print(f"route {route} not found in handlers: {self.routes}")
-                    await websocket.send_text(error_response("Route not found"))
+                    logging.info(f"route {route} not found in handlers: {self.routes}")
+                    await send_msg(error_response("Route not found"), parsed_msg)
             except orjson.JSONDecodeError as e:
-                await websocket.send_text(error_response(e=e))
+                await send_msg(error_response(e=e), parsed_msg)
             except KeyError as e:
-                await websocket.send_text(error_response(e=e))
+                await send_msg(error_response(e=e), parsed_msg)
             except WebSocketDisconnect as e:
-                print("WebSocketDisconnect")
+                logging.error("WebSocketDisconnect")
                 await websocket.close()
                 break
             except Exception as e:
-                print("failed to handle receive_text")
+                logging.error("failed to handle receive_text")
                 traceback.print_exc()

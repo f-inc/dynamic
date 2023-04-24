@@ -8,8 +8,11 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = "^0.95.1"
-uvicorn = "^0.21.1"
+uvicorn = {version = "^0.21.1", extras= ["standard"]}
 orjson = "^3.8.10"
+langchain = "^0.0.147"
+openai = "^0.27.4"
+python-dotenv = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -11,7 +11,11 @@ socket.addEventListener("open", (event) => {
   console.log("WebSocket opened:", event);
 
   setTimeout(() => {
-    sendMessage({ route: "default", data: { product: "cookies" } });
+    sendMessage({ route: "chain", data: { product: "cookies" } });
+  }, 2000);
+
+  setTimeout(() => {
+    sendMessage({ route: "chain", data: { product: "ties" } });
   }, 3000);
 });
 
