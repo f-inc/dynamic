@@ -114,11 +114,11 @@ class Server:
                 traceback.print_exc()
                 return error_response(f"Can't handle message for route {route}")
 
-        async def send_msg(msg, original_msg):
+        async def send_msg(msg, original_msg={}):
             logging.info(f"Sending message {msg}")
             response = {
                 "route": route,
-                "message_id": original_msg["message_id"],
+                "message_id": original_msg.get("message_id", "NO_MESSAGE_ID"),
                 "data": msg,
             }
             await websocket.send_text(orjson.dumps(response).decode("utf-8"))
@@ -127,13 +127,14 @@ class Server:
         while True:
             try:
                 msg = await websocket.receive_text()
-                message_id = str(uuid.uuid4())
+                logging.info(f"Received message {msg}")
 
                 parsed_msg = parse_json_string(msg)
-                parsed_msg["message_id"] = message_id
-                logging.info(f"Received message {parsed_msg}")
 
+                message_id = str(uuid.uuid4())
+                parsed_msg["message_id"] = message_id
                 route = parsed_msg["route"]
+
                 if route in self.routes:
                     logging.info(f"Found handler for route {route}")
                     response = handle_msg(route, parsed_msg.get("data", {}))
@@ -142,9 +143,9 @@ class Server:
                     logging.info(f"route {route} not found in handlers: {self.routes}")
                     await send_msg(error_response("Route not found"), parsed_msg)
             except orjson.JSONDecodeError as e:
-                await send_msg(error_response(e=e), parsed_msg)
+                await send_msg(error_response(e=e))
             except KeyError as e:
-                await send_msg(error_response(e=e), parsed_msg)
+                await send_msg(error_response(e=e))
             except WebSocketDisconnect as e:
                 logging.error("WebSocketDisconnect")
                 await websocket.close()
