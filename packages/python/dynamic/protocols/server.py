@@ -19,7 +19,6 @@ def parse_json_string(json_string):
     try:
         parsed_json = orjson.loads(json_string)
         return parsed_json
-        # return orjson.dumps(parsed_json).decode("utf-8")
     except orjson.JSONDecodeError as e:
         raise e
 
@@ -29,7 +28,14 @@ def error_response(message="Unexpected Error", e=None):
     return orjson.dumps(error_response).decode("utf-8")
 
 
+def run_agent(agent_func, json_data, send_msg):
+    logging.info(f"Running agent... {json_data}")
+    # look up if agent is already running
+    # might need to check what kind of agent
+
+
 class Server:
+    app = FastAPI(debug=True)
     routes = {}
 
     def __init__(self, routes, host="0.0.0.0", port=8000, static_dir=None):
@@ -37,10 +43,9 @@ class Server:
         self.port = port
 
         for route in routes:
-            print(f"Adding route {route}")
+            logging.info(f"Adding route {route}")
             self.add_route(route, routes[route])
 
-        self.app = FastAPI()
         # Enable CORS for your frontend domain
         self.app.add_middleware(
             CORSMiddleware,
@@ -87,7 +92,12 @@ class Server:
 
     def start(self):
         logging.info(f"Starting server on host:port {self.host}:{self.port}")
-        uvicorn.run(self.app, host=self.host, port=self.port, log_level="info")
+        uvicorn.run(
+            self.app,
+            host=self.host,
+            port=self.port,
+            log_level="info",
+        )
 
     async def websocket_handler(self, websocket: WebSocket):
         def handle_msg(route, data):
@@ -100,18 +110,17 @@ class Server:
                 if chain["type"] == "chain":
                     return chain["func"].run(data)
                 elif chain["type"] == "agent":
+                    run_agent(chain["func"], data, send_msg)
                     return chain["func"].run(data)
                 elif chain["type"] == "handler":
                     return chain["func"](data)
                 else:
                     return error_response(f"Route {route} not found")
             except ValueError as e:
-                logging.info(f"Error processing handler message for route {route}")
-                traceback.print_exc()
+                logging.error(f"Error processing handler message for route {route}")
                 return error_response(f"Can't handle message for route {route}")
             except Exception as e:
-                logging.info(f"Error processing handler message for route {route}")
-                traceback.print_exc()
+                logging.error(f"Error processing handler message for route {route}")
                 return error_response(f"Can't handle message for route {route}")
 
         async def send_msg(msg, original_msg={}):

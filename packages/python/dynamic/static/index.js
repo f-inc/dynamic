@@ -10,13 +10,13 @@ const socket = new WebSocket(`ws://${window.location.host}/ws`);
 socket.addEventListener("open", (event) => {
   console.log("WebSocket opened:", event);
 
-  setTimeout(() => {
-    sendMessage({ route: "chain", data: { product: "cookies" } });
-  }, 2000);
+  /*  setTimeout(() => {*/
+  /*sendMessage({ route: "chain", data: { product: "cookies" } });*/
+  /*}, 2000);*/
 
   setTimeout(() => {
-    sendMessage({ route: "chain", data: { product: "ties" } });
-  }, 3000);
+    sendMessage({ route: "agent", data: { product: "ties" } });
+  }, 1000);
 });
 
 socket.addEventListener("connected", (event) => {
