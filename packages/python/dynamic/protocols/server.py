@@ -106,14 +106,14 @@ class Server:
                 logging.error(f"Route {route} not found")
                 return error_response(f"Route {route} not found")
             try:
-                chain = self.routes[route]
-                if chain["type"] == "chain":
-                    return chain["func"].run(data)
-                elif chain["type"] == "agent":
-                    run_agent(chain["func"], data, send_msg)
-                    return chain["func"].run(data)
-                elif chain["type"] == "handler":
-                    return chain["func"](data)
+                route_data = self.routes[route]
+                if route_data["type"] == "chain":
+                    return route_data["func"].run(data)
+                elif route_data["type"] == "agent":
+                    run_agent(route_data["func"], data, send_msg)
+                    return route_data["func"].run(data)
+                elif route_data["type"] == "handler":
+                    return route_data["func"](data)
                 else:
                     return error_response(f"Route {route} not found")
             except ValueError as e:
@@ -123,15 +123,15 @@ class Server:
                 logging.error(f"Error processing handler message for route {route}")
                 return error_response(f"Can't handle message for route {route}")
 
-        async def send_msg(msg, original_msg={}):
+        async def send_msg(response, original_msg={}):
             logging.info(f"Sending message {msg}")
             response = {
-                "route": route,
+                "route": original_msg.get("route"),
                 "message_id": original_msg.get("message_id", "NO_MESSAGE_ID"),
-                "data": msg,
+                "data": response,
             }
             await websocket.send_text(orjson.dumps(response).decode("utf-8"))
-
+        
         await websocket.accept()
         while True:
             try:
@@ -140,9 +140,15 @@ class Server:
 
                 parsed_msg = parse_json_string(msg)
 
-                message_id = str(uuid.uuid4())
-                parsed_msg["message_id"] = message_id
-                route = parsed_msg["route"]
+                # Note: the function send_msg implies that a message_id could already exist (TODO: Remove Note)
+                if parsed_msg.get("message_id") is None:
+                    parsed_msg["message_id"] = str(uuid.uuid4())
+                route = parsed_msg.get("route")
+
+                if route is None:
+                    # handle situation when send_msg(err)
+                    # otherwise, it loops
+                    return
 
                 if route in self.routes:
                     logging.info(f"Found handler for route {route}")
