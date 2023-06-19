@@ -140,7 +140,6 @@ class Server:
 
                 parsed_msg = parse_json_string(msg)
 
-                # Note: the function send_msg implies that a message_id could already exist (TODO: Remove Note)
                 if parsed_msg.get("message_id") is None:
                     parsed_msg["message_id"] = str(uuid.uuid4())
                 route = parsed_msg.get("route")
