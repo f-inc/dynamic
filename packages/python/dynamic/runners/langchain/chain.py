@@ -21,9 +21,7 @@ class ChainRunner(Runner):
     
     def run(self):
         prompt_input = self.config.prompt_input
-        if isinstance(prompt_input, str):
-            return self.handle.run(prompt_input)
-        return self.handle.run(**prompt_input)
+        return self.handle.run(prompt_input)
     
 if __name__ == "__main__":
     """
