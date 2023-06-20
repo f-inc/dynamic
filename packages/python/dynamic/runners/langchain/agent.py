@@ -8,11 +8,11 @@ from dynamic.runners.runner import Runner
 from langchain.agents import Agent, AgentExecutor
 
 @dataclass
-class AgentConfig:
+class AgentRunnerConfig:
     agent_input: Union[str, Dict[str, str]]
 
 class AgentRunner(Runner):
-    def __init__(self, handle: Union[Agent, AgentExecutor], config: AgentConfig):
+    def __init__(self, handle: Union[Agent, AgentExecutor], config: AgentRunnerConfig):
         if not (isinstance(handle, Agent) or isinstance(handle, AgentExecutor)):
             raise ValueError(f"AgentRunner requires handle to be a Langchain Agent or AgentExecutor. Instead got {type(handle)}.")
         
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     )
 
     agent_input = dict(input="What does \"donde esta la biblioteca?\" mean? And what is a way to respond to this?")
-    config = AgentConfig(agent_input=agent_input)
+    config = AgentRunnerConfig(agent_input=agent_input)
 
     runner = AgentRunner(agent, config)
 
