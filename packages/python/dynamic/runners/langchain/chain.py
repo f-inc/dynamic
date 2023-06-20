@@ -24,37 +24,6 @@ class ChainRunner(Runner):
         return self.handle.run(prompt_input)
     
 if __name__ == "__main__":
-    """
-    The usefulness of the abstraction helps promot readability in our server code.
-
-    Instead of:
-
-    ```
-        route_data = self.routes[route]
-            if route_data["type"] == "chain":
-                return route_data["func"].run(data)
-            elif route_data["type"] == "agent":
-                run_agent(route_data["func"], data, send_msg)
-                return route_data["func"].run(data)
-            elif route_data["type"] == "handler":
-                return route_data["func"](data)
-            else:
-                return error_response(f"Route {route} not found")
-
-    ```
-    
-    Server code could look more like:
-
-    ```
-        ....
-        runner = route_data.get("runner")
-        if runner:
-            runner(handle, config).run()
-        ....
-
-    ```
-
-    """
     print("Importing deps...")
     from dotenv import load_dotenv
 
