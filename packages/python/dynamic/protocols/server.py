@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
@@ -42,9 +42,19 @@ class Server:
         self.host = host
         self.port = port
 
+        dyanmic_routes = APIRouter()
+        @dyanmic_routes.get("")
+        async def default_subroute(req: Request):
+            return dict(
+                message=f"Test - {req.url.path}"
+            )
+        
         for route in routes:
             logging.info(f"Adding route {route}")
             self.add_route(route, routes[route])
+            # TODO: mount route here
+            # See .include_router - https://fastapi.tiangolo.com/tutorial/bigger-applications/
+            self.app.include_router(dyanmic_routes, prefix=f"/{route}")
 
         # Enable CORS for your frontend domain
         self.app.add_middleware(
