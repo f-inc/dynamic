@@ -9,11 +9,11 @@ from langchain.chains.base import Chain
 
 
 @dataclass
-class ChainConfig:
+class ChainRunnerConfig:
     prompt_input: Union[str, Dict[str, str]]
 
 class ChainRunner(Runner):
-    def __init__(self, handle: Chain, config: ChainConfig):
+    def __init__(self, handle: Chain, config: ChainRunnerConfig):
         if not isinstance(handle, Chain):
             raise ValueError(f"ChainRunner requires handle to be a Langchain Chain. Instead got {type(handle)}.")
         
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     print("Testing Runner...")
     
-    config = ChainConfig(prompt_input="running shoes")
+    config = ChainRunnerConfig(prompt_input="running shoes")
 
     runner = ChainRunner(handle=chain, config=config)
 
