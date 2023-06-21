@@ -57,7 +57,7 @@ class Server:
             logging.info(f"Adding route {route}")
             self.add_route(route, handle)
             
-            async def subroute(req: Request):
+            async def run_route(req: Request):
                 # collect data
                 data = await req.json()
 
@@ -74,7 +74,7 @@ class Server:
                     output=output
                 )
             
-            self.app.add_api_route(f"/{route}", subroute, methods=["GET", "POST"])
+            self.app.add_api_route(route, run_route, methods=["GET", "POST"])
 
         # Enable CORS for your frontend domain
         self.app.add_middleware(
@@ -133,28 +133,28 @@ class Server:
         def handle_msg(route, data):
             logging.info(f"Processing handler message for route {route} data {data}")
             try:
-                handle = route.get("handle")
-                runner = route.get("runner")
-                runner_config_type = route.get("runner_config_type")
+                route_data = self.routes[route]
+                handle = route_data.get("handle")
+                runner = route_data.get("runner")
+                runner_config_type = route_data.get("runner_config_type")
                 config = runner_config_type(**data)
                 
                 return runner(handle, config).run()
             except ValueError as e:
-                logging.error(f"Error processing handler message for route {route}")
+                logging.error(f"ValueError while processing route {route}")
                 return error_response(f"Can't handle message for route {route}", e=e)
             except Exception as e:
                 logging.error(f"Error processing handler message for route {route}")
                 return error_response(f"Can't handle message for route {route}", e=e)
 
-        async def send_msg(response, original_msg={}, broadcast=False):
-            logging.info(f"Sending message {message}")
+        async def send_msg(data, original_msg={}, broadcast=False):
             # TODO: Create Message class
-            response = {
-                "route": original_msg.get("route"),
-                "message_id": original_msg.get("message_id"),
-                "data": response,
-            }
-            message = orjson.dumps(response).decode("utf-8")
+            message = dict(
+                route=original_msg.get("route"),
+                message_id=original_msg.get("message_id"),
+                data=data,
+            )
+            logging.info(f"Sending message {message}")
             if broadcast:
                 await self.connection_manager.broadcast(message)
             else:
@@ -197,3 +197,47 @@ class Server:
             except Exception as e:
                 logging.error("failed to handle recieve_json")
                 traceback.print_exc()
+
+    def _add_test_ws_html(self):
+        from fastapi.responses import HTMLResponse
+        html = """
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Chat</title>
+                </head>
+                <body>
+                    <h1>WebSocket Chat</h1>
+                    <form action="" onsubmit="sendMessage(event)">
+                        <input type="text" id="messageText" autocomplete="off"/>
+                        <button>Send</button>
+                    </form>
+                    <ul id='messages'>
+                    </ul>
+                    <script>
+                        var ws = new WebSocket("ws://localhost:8000/ws");
+                        ws.onmessage = function(event) {
+                            var messages = document.getElementById('messages')
+                            var message = document.createElement('li')
+                            var content = document.createTextNode(event.data)
+                            message.appendChild(content)
+                            messages.appendChild(message)
+                        };
+                        function sendMessage(event) {
+                            var input = document.getElementById("messageText")
+                            var data = { prompt_input: input.value }
+                            var value = { data: data,  route: "/chain" }
+                            ws.send(JSON.stringify(value))
+                            input.value = ''
+                            event.preventDefault()
+                        }
+                    </script>
+                </body>
+            </html>
+            """
+        
+        async def get_html():
+            return HTMLResponse(html)
+        
+        self.app.add_api_route("/test_ws", get_html)
+        
