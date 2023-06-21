@@ -4,7 +4,7 @@ import orjson
 import traceback
 import logging
 
-# server
+# fastapi
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -52,8 +52,6 @@ class Server:
             handle = routes[route]
             logging.info(f"Adding route {route}")
             self.add_route(route, handle)
-            # TODO: mount route here
-            # See .include_router - https://fastapi.tiangolo.com/tutorial/bigger-applications/
             
             async def subroute(req: Request):
                 data = await req.json()
