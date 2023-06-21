@@ -11,6 +11,9 @@ import logging
 from langchain.chains.base import Chain
 from langchain.agents import Agent
 
+# dynamic
+from dynamic.protocols.ws import WSConnectionManager
+
 
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -41,6 +44,7 @@ class Server:
     def __init__(self, routes, host="0.0.0.0", port=8000, static_dir=None):
         self.host = host
         self.port = port
+        self.connection_manager = WSConnectionManager()
 
         for route in routes:
             logging.info(f"Adding route {route}")
@@ -125,16 +129,20 @@ class Server:
                 logging.error(f"Error processing handler message for route {route}")
                 return error_response(f"Can't handle message for route {route}")
 
-        async def send_msg(response, original_msg={}):
+        async def send_msg(response, original_msg={}, broadcast=False):
             logging.info(f"Sending message {msg}")
             response = {
                 "route": original_msg.get("route"),
                 "message_id": original_msg.get("message_id", "NO_MESSAGE_ID"),
                 "data": response,
             }
-            await websocket.send_text(orjson.dumps(response).decode("utf-8"))
-        
-        await websocket.accept()
+            message = orjson.dumps(response).decode("utf-8")
+            if broadcast:
+                await self.connection_manager.broadcast(message)
+            else:
+                await self.connection_manager.send_message(message, websocket)
+
+        await self.connection_manager.connect(websocket)
         while True:
             try:
                 msg = await websocket.receive_text()
