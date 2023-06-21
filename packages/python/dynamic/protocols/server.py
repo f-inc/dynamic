@@ -1,16 +1,22 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from starlette.responses import FileResponse
-import uvicorn
 import os
 import uuid
 import orjson
 import traceback
 import logging
+
+# server
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
+import uvicorn
+
+# langchan
 from langchain.chains.base import Chain
 from langchain.agents import Agent
 
+# dynamic
+from dynamic.runners.utils import get_runner
 
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -43,17 +49,24 @@ class Server:
         self.port = port
 
         for route in routes:
+            handle = routes[route]
             logging.info(f"Adding route {route}")
-            self.add_route(route, routes[route])
+            self.add_route(route, handle)
             # TODO: mount route here
             # See .include_router - https://fastapi.tiangolo.com/tutorial/bigger-applications/
             
             async def subroute(req: Request):
+                data = await req.json()
+                config_dict = data.get("config")
+                runner, runner_config_type = get_runner(handle)
+                config = runner_config_type(**config_dict)
+                output = runner(handle, config).run()
                 return dict(
-                    message=f"subroute - {req.url.path}"
+                    message="Ran subroute successfully!",
+                    output=output
                 )
             
-            self.app.add_api_route(f"/{route}", subroute)
+            self.app.add_api_route(f"/{route}", subroute, methods=["GET", "POST"])
 
         # Enable CORS for your frontend domain
         self.app.add_middleware(
