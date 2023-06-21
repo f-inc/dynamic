@@ -3,6 +3,7 @@ import uuid
 import orjson
 import traceback
 import logging
+from typing import Any, Callable
 
 # fastapi
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
@@ -16,6 +17,7 @@ from langchain.chains.base import Chain
 from langchain.agents import Agent
 
 # dynamic
+from dynamic.runners.runner import Runner
 from dynamic.runners.utils import get_runner
 
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -54,9 +56,15 @@ class Server:
             self.add_route(route, handle)
             
             async def subroute(req: Request):
+                # collect data
                 data = await req.json()
+
+                # setup runner config
                 config_dict = data.get("config")
-                runner, runner_config_type = get_runner(handle)
+                runner = self.routes[route].get("runner")
+                runner_config_type = self.routes[route].get("runner_config_type")
+
+                # run runner and return output
                 config = runner_config_type(**config_dict)
                 output = runner(handle, config).run()
                 return dict(
@@ -99,16 +107,16 @@ class Server:
 
         self.app.websocket("/ws")(self.websocket_handler)
 
-    def add_route(self, route, func):
+    def add_route(self, route: str, handle: Callable) -> None:
+        # TODO: Create Routes and Route classes
         # check route intance type
-        if isinstance(func, Chain):
-            self.routes[route] = {"func": func, "type": "chain"}
-        elif isinstance(func, Agent):
-            self.routes[route] = {"func": func, "type": "agent"}
-        elif callable(func):
-            self.routes[route] = {"func": func, "type": "handler"}
-        else:
-            logging.warning(f"Route {route} is not a valid type")
+        runner, runner_config_type = get_runner(handle)
+
+        self.routes[route] = dict(
+            handle=handle,
+            runner=runner,
+            runner_config_type=runner_config_type,
+        )
 
     def start(self):
         logging.info(f"Starting server on host:port {self.host}:{self.port}")
@@ -126,16 +134,12 @@ class Server:
                 logging.error(f"Route {route} not found")
                 return error_response(f"Route {route} not found")
             try:
-                route_data = self.routes[route]
-                if route_data["type"] == "chain":
-                    return route_data["func"].run(data)
-                elif route_data["type"] == "agent":
-                    run_agent(route_data["func"], data, send_msg)
-                    return route_data["func"].run(data)
-                elif route_data["type"] == "handler":
-                    return route_data["func"](data)
-                else:
-                    return error_response(f"Route {route} not found")
+                handle = self.routes.get("handle")
+                runner = self.routes.get("runner")
+                runner_config_type = self.routes.get("runner_config_type")
+                config = runner_config_type(**data)
+                
+                return runner(handle, config).run()
             except ValueError as e:
                 logging.error(f"Error processing handler message for route {route}")
                 return error_response(f"Can't handle message for route {route}")
