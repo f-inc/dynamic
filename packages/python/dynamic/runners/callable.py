@@ -6,13 +6,13 @@ from dynamic.runners.runner import Runner
 
 
 @dataclass
-class CallableConfig:
+class CallableRunnerConfig:
     params: Any
 
     
 
 class CallableRunner(Runner):
-    def __init__(self, handle: Callable, config: CallableConfig):
+    def __init__(self, handle: Callable, config: CallableRunnerConfig):
         if not callable(handle):
             raise ValueError(f"CallableRunner requires handle to be a Callable. Instead got {type(handle)}.")
         
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     def hello(msg):
         return msg
     
-    config = CallableConfig(params=dict(msg="Hello World!\n-from Runner"))
+    config = CallableRunnerConfig(params=dict(msg="Hello World!\n-from Runner"))
 
     runner = CallableRunner(hello, config)
 
