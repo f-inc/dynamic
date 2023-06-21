@@ -12,7 +12,7 @@ from langchain.chains.base import Chain
 from langchain.agents import Agent
 
 # dynamic
-from dynamic.protocols.ws import WSConnectionManager
+from dynamic.protocols.ws import ConnectionManager
 
 
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -44,7 +44,7 @@ class Server:
     def __init__(self, routes, host="0.0.0.0", port=8000, static_dir=None):
         self.host = host
         self.port = port
-        self.connection_manager = WSConnectionManager()
+        self.connection_manager = ConnectionManager()
 
         for route in routes:
             logging.info(f"Adding route {route}")
@@ -166,14 +166,14 @@ class Server:
                 else:
                     logging.info(f"route {route} not found in handlers: {self.routes}")
                     await send_msg(error_response("Route not found"), parsed_msg)
+            except WebSocketDisconnect as e:
+                logging.info("WebSocketDisconnect")
+                await self.connection_manager.disconnect(websocket)
+                break
             except orjson.JSONDecodeError as e:
                 await send_msg(error_response(e=e))
             except KeyError as e:
                 await send_msg(error_response(e=e))
-            except WebSocketDisconnect as e:
-                logging.error("WebSocketDisconnect")
-                await websocket.close()
-                break
             except Exception as e:
                 logging.error("failed to handle receive_text")
                 traceback.print_exc()

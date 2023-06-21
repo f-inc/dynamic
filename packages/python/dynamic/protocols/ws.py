@@ -15,7 +15,7 @@ def setup_websocket(app, routes):
     update_ws_routes(routes)
 
 
-class WSConnectionManager:
+class ConnectionManager:
     """WebSocket connection manager."""
 
     # TODO: Add logs
