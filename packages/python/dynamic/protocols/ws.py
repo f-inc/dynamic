@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import Any, Dict, List
 
 from fastapi import WebSocket
 
@@ -29,9 +29,9 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def send_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    async def send_message(self, message: Dict[str, Any], websocket: WebSocket):
+        await websocket.send_json(message)
 
-    async def broadcast(self, message: str):
+    async def broadcast(self, message: Dict[str, Any]):
         for connection in self.active_connections:
-            await connection.send_text(message)
+            await connection.send_json(message)

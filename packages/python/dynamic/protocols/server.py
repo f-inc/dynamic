@@ -16,6 +16,10 @@ import uvicorn
 from dynamic.runners.utils import get_runner
 from dynamic.protocols.ws import ConnectionManager
 
+# Exceptions
+class RouteNotFound(Exception):
+    pass
+
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -28,6 +32,7 @@ def parse_json_string(json_string):
 
 
 def error_response(message="Unexpected Error", e=None):
+    # TODO: Remove
     error_response = {"error": message, "details": str(e)}
     return orjson.dumps(error_response).decode("utf-8")
 
@@ -127,28 +132,26 @@ class Server:
     async def websocket_handler(self, websocket: WebSocket):
         def handle_msg(route, data):
             logging.info(f"Processing handler message for route {route} data {data}")
-            if route not in self.routes:
-                logging.error(f"Route {route} not found")
-                return error_response(f"Route {route} not found")
             try:
-                handle = self.routes.get("handle")
-                runner = self.routes.get("runner")
-                runner_config_type = self.routes.get("runner_config_type")
+                handle = route.get("handle")
+                runner = route.get("runner")
+                runner_config_type = route.get("runner_config_type")
                 config = runner_config_type(**data)
                 
                 return runner(handle, config).run()
             except ValueError as e:
                 logging.error(f"Error processing handler message for route {route}")
-                return error_response(f"Can't handle message for route {route}")
+                return error_response(f"Can't handle message for route {route}", e=e)
             except Exception as e:
                 logging.error(f"Error processing handler message for route {route}")
-                return error_response(f"Can't handle message for route {route}")
+                return error_response(f"Can't handle message for route {route}", e=e)
 
         async def send_msg(response, original_msg={}, broadcast=False):
-            logging.info(f"Sending message {msg}")
+            logging.info(f"Sending message {message}")
+            # TODO: Create Message class
             response = {
                 "route": original_msg.get("route"),
-                "message_id": original_msg.get("message_id", "NO_MESSAGE_ID"),
+                "message_id": original_msg.get("message_id"),
                 "data": response,
             }
             message = orjson.dumps(response).decode("utf-8")
@@ -160,27 +163,27 @@ class Server:
         await self.connection_manager.connect(websocket)
         while True:
             try:
-                msg = await websocket.receive_text()
-                logging.info(f"Received message {msg}")
+                message = await websocket.receive_json()
+                logging.info(f"Received message {message}")
 
-                parsed_msg = parse_json_string(msg)
 
-                if parsed_msg.get("message_id") is None:
-                    parsed_msg["message_id"] = str(uuid.uuid4())
-                route = parsed_msg.get("route")
+                if message.get("message_id") is None:
+                    message["message_id"] = str(uuid.uuid4())
+                route = message.get("route")
 
                 if route is None:
-                    # handle situation when send_msg(err)
-                    # otherwise, it loops
-                    return
-
+                    err_message = f"Recieved a message without a route. Message - {str(message)}"
+                    logging.error(err_message)
+                    raise RouteNotFound(err_message)
+                
                 if route in self.routes:
                     logging.info(f"Found handler for route {route}")
-                    response = handle_msg(route, parsed_msg.get("data", {}))
-                    await send_msg(response, parsed_msg)
+                    response = handle_msg(route, message.get("data", {}))
+                    await send_msg(response, message)
                 else:
-                    logging.info(f"route {route} not found in handlers: {self.routes}")
-                    await send_msg(error_response("Route not found"), parsed_msg)
+                    err_message = f"Route ({route}) not defined on the server."
+                    logging.error(err_message)
+                    raise RouteNotFound(err_message)
             except WebSocketDisconnect as e:
                 logging.info("WebSocketDisconnect")
                 await self.connection_manager.disconnect(websocket)
@@ -189,6 +192,8 @@ class Server:
                 await send_msg(error_response(e=e))
             except KeyError as e:
                 await send_msg(error_response(e=e))
+            except RouteNotFound as e:
+                await send_msg(error_response(e=e))
             except Exception as e:
-                logging.error("failed to handle receive_text")
+                logging.error("failed to handle recieve_json")
                 traceback.print_exc()
