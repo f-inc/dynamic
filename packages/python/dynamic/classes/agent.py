@@ -14,7 +14,7 @@ class DynamicAgent:
         self.llm = llm
         self.kwargs = kwargs
 
-    def _initialize_agent(self, websocket: WebSocket):
+    def _initialize_agent_with_websocket(self, websocket: WebSocket):
         logging.info("Setting up streaming settings for agent...")
         llm = self.llm
 

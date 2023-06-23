@@ -7,29 +7,27 @@ from fastapi import WebSocket
 # dyanmic
 from dynamic.runners.runner import Runner
 from dynamic.classes.agent import DynamicAgent
+from dynamic.runners.langchain.config import ChainRunnerConfig
 
 # langchain
 from langchain.agents import Agent, AgentExecutor, initialize_agent
 
 
-@dataclass
-class AgentRunnerConfig:
-    agent_input: Union[str, Dict[str, str]]
-    streaming: bool = False
-
 class AgentRunner(Runner):
-    def __init__(self, handle: Union[DynamicAgent, Agent, AgentExecutor], config: AgentRunnerConfig, websocket: Optional[WebSocket] = None):
-        self.streaming = False
+    def __init__(self,
+        handle: Union[DynamicAgent, Agent, AgentExecutor],
+        config: ChainRunnerConfig,
+        websocket: Optional[WebSocket] = None,
+        streaming: bool = False,
+    ):
+        self.streaming = streaming
         self.config = config
 
-        if self.config.streaming:
-            # mark runner as streaming
-            self.streaming = True
-
+        if streaming:
             if not isinstance(handle, DynamicAgent):
                 raise ValueError(f"A streaming Agent needs to a DynamicAgent, recieved {type(handle)}.")
 
-            handle = handle._initialize_agent(websocket)
+            handle = handle._initialize_agent_with_websocket(websocket)
 
         if not (isinstance(handle, Agent) or isinstance(handle, AgentExecutor)):
             raise ValueError(f"AgentRunner requires handle to be a Langchain Agent or AgentExecutor. Instead got {type(handle)}.")
@@ -37,11 +35,11 @@ class AgentRunner(Runner):
         super(AgentRunner, self).__init__(handle, config)
 
     async def run(self):
-        agent_input = self.config.agent_input
+        input = self.config.input
         if self.streaming:
-            return await self.handle.arun(agent_input)
+            return await self.handle.arun(input)
 
-        return self.handle.run(agent_input)
+        return self.handle.run(input)
 
 
 

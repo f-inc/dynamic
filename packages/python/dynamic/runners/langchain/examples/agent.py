@@ -11,7 +11,7 @@ from langchain.agents import AgentType
 from langchain.llms import OpenAI
 from langchain.agents.agent_toolkits import NLAToolkit
 
-from dynamic.runners.langchain import AgentRunner, AgentRunnerConfig
+from dynamic.runners.langchain import AgentRunner, ChainRunnerConfig
 
 if __name__ == "__main__":
     llm = OpenAI(
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     )
 
     agent_input = dict(input="What does \"donde esta la biblioteca?\" mean? And what is a way to respond to this?")
-    config = AgentRunnerConfig(agent_input=agent_input)
+    config = ChainRunnerConfig(agent_input=agent_input)
 
     runner = AgentRunner(agent, config)
 
