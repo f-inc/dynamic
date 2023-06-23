@@ -102,9 +102,10 @@ class Server:
         """Dynamically add static routes"""
         handle = route.handle
         path = route.path
+        api_path = f"/{path}"
         runner, runner_config_type = get_runner(handle)
 
-        self.routes[path] = dict(
+        self.routes[api_path] = dict(
             handle=handle,
             runner=runner,
             runner_config_type=runner_config_type,
@@ -129,7 +130,6 @@ class Server:
                 output=output
             )
         
-        api_path = f"/{path}"
         self.app.add_api_route(api_path, run_route, methods=["GET", "POST"])
 
     def start(self):
@@ -241,7 +241,7 @@ class Server:
                         };
                         function sendMessage(event) {
                             var input = document.getElementById("messageText")
-                            var data = { agent_input: input.value }
+                            var data = { input: input.value }
                             var value = { data: data,  route: "/agent" }
                             ws.send(JSON.stringify(value))
                             input.value = ''

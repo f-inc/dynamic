@@ -35,11 +35,11 @@ class AgentRunner(Runner):
         super(AgentRunner, self).__init__(handle, config)
 
     async def run(self):
-        agent_input = self.config.agent_input
+        input = self.config.input
         if self.streaming:
-            return await self.handle.arun(agent_input)
+            return await self.handle.arun(input)
 
-        return self.handle.run(agent_input)
+        return self.handle.run(input)
 
 
 

@@ -10,8 +10,8 @@ class RouteType(Enum):
 @dataclass
 class Route:
     handle: Callable
-    streaming: bool = False
     path: str
+    streaming: bool = False
     # TODO: Implement type
     type: Optional[RouteType] = None
 

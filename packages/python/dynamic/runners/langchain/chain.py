@@ -17,5 +17,5 @@ class ChainRunner(Runner):
         super(ChainRunner, self).__init__(handle, config, **kwargs)
     
     def run(self):
-        prompt_input = self.config.prompt_input
+        prompt_input = self.config.input
         return self.handle.run(prompt_input)
