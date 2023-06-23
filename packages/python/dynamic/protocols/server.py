@@ -119,8 +119,6 @@ class Server:
 
             # setup runner config
             config_dict = data.get("config")
-            runner = self.routes[route].get("runner")
-            runner_config_type = self.routes[route].get("runner_config_type")
 
             # run runner and return output
             config = runner_config_type(**config_dict)
