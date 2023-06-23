@@ -12,13 +12,13 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 import uvicorn
 
-# langchan
-from langchain.chains.base import Chain
-from langchain.agents import Agent
-
 # dynamic
-from dynamic.runners.runner import Runner
 from dynamic.runners.utils import get_runner
+from dynamic.protocols.ws import ConnectionManager
+
+# Exceptions
+class RouteNotFound(Exception):
+    pass
 
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -32,6 +32,7 @@ def parse_json_string(json_string):
 
 
 def error_response(message="Unexpected Error", e=None):
+    # TODO: Remove
     error_response = {"error": message, "details": str(e)}
     return orjson.dumps(error_response).decode("utf-8")
 
@@ -49,13 +50,14 @@ class Server:
     def __init__(self, routes, host="0.0.0.0", port=8000, static_dir=None):
         self.host = host
         self.port = port
+        self.connection_manager = ConnectionManager()
 
         for route in routes:
             handle = routes[route]
             logging.info(f"Adding route {route}")
             self.add_route(route, handle)
             
-            async def subroute(req: Request):
+            async def run_route(req: Request):
                 # collect data
                 data = await req.json()
 
@@ -72,7 +74,7 @@ class Server:
                     output=output
                 )
             
-            self.app.add_api_route(f"/{route}", subroute, methods=["GET", "POST"])
+            self.app.add_api_route(route, run_route, methods=["GET", "POST"])
 
         # Enable CORS for your frontend domain
         self.app.add_middleware(
@@ -128,66 +130,116 @@ class Server:
         )
 
     async def websocket_handler(self, websocket: WebSocket):
-        def handle_msg(route, data):
+        async def handle_msg(route, data):
             logging.info(f"Processing handler message for route {route} data {data}")
-            if route not in self.routes:
-                logging.error(f"Route {route} not found")
-                return error_response(f"Route {route} not found")
             try:
-                handle = self.routes.get("handle")
-                runner = self.routes.get("runner")
-                runner_config_type = self.routes.get("runner_config_type")
+                route_data = self.routes[route]
+                handle = route_data.get("handle")
+                runner = route_data.get("runner")
+                runner_config_type = route_data.get("runner_config_type")
                 config = runner_config_type(**data)
                 
-                return runner(handle, config).run()
+                await runner(handle, config, websocket=websocket).run()
             except ValueError as e:
-                logging.error(f"Error processing handler message for route {route}")
-                return error_response(f"Can't handle message for route {route}")
+                logging.error(f"ValueError while processing route {route}")
+                return error_response(f"ValueError for route {route}", e=e)
             except Exception as e:
                 logging.error(f"Error processing handler message for route {route}")
-                return error_response(f"Can't handle message for route {route}")
+                traceback.print_exc()
+                return error_response(f"Can't handle message for route {route}", e=e)
 
-        async def send_msg(response, original_msg={}):
-            logging.info(f"Sending message {msg}")
-            response = {
-                "route": original_msg.get("route"),
-                "message_id": original_msg.get("message_id", "NO_MESSAGE_ID"),
-                "data": response,
-            }
-            await websocket.send_text(orjson.dumps(response).decode("utf-8"))
-        
-        await websocket.accept()
+        async def send_msg(data, original_msg={}, broadcast=False):
+            # TODO: Create Message class
+            message = dict(
+                route=original_msg.get("route"),
+                message_id=original_msg.get("message_id"),
+                data=data,
+            )
+            logging.info(f"Sending message {message}")
+            if broadcast:
+                await self.connection_manager.broadcast(message)
+            else:
+                await self.connection_manager.send_message(message, websocket)
+
+        await self.connection_manager.connect(websocket)
         while True:
             try:
-                msg = await websocket.receive_text()
-                logging.info(f"Received message {msg}")
+                message = await websocket.receive_json()
+                logging.info(f"Received message {message}")
 
-                parsed_msg = parse_json_string(msg)
 
-                if parsed_msg.get("message_id") is None:
-                    parsed_msg["message_id"] = str(uuid.uuid4())
-                route = parsed_msg.get("route")
+                if message.get("message_id") is None:
+                    message["message_id"] = str(uuid.uuid4())
+                route = message.get("route")
 
                 if route is None:
-                    # handle situation when send_msg(err)
-                    # otherwise, it loops
-                    return
-
+                    err_message = f"Recieved a message without a route. Message - {str(message)}"
+                    logging.error(err_message)
+                    raise RouteNotFound(err_message)
+                
                 if route in self.routes:
                     logging.info(f"Found handler for route {route}")
-                    response = handle_msg(route, parsed_msg.get("data", {}))
-                    await send_msg(response, parsed_msg)
+                    response = await handle_msg(route, message.get("data", {}))
+                    await send_msg(response, message)
                 else:
-                    logging.info(f"route {route} not found in handlers: {self.routes}")
-                    await send_msg(error_response("Route not found"), parsed_msg)
+                    err_message = f"Route ({route}) not defined on the server."
+                    logging.error(err_message)
+                    raise RouteNotFound(err_message)
+            except WebSocketDisconnect as e:
+                logging.info("WebSocketDisconnect")
+                await self.connection_manager.disconnect(websocket)
+                break
             except orjson.JSONDecodeError as e:
                 await send_msg(error_response(e=e))
             except KeyError as e:
                 await send_msg(error_response(e=e))
-            except WebSocketDisconnect as e:
-                logging.error("WebSocketDisconnect")
-                await websocket.close()
-                break
+            except RouteNotFound as e:
+                await send_msg(error_response(e=e))
             except Exception as e:
-                logging.error("failed to handle receive_text")
+                logging.error("failed to handle recieve_json")
                 traceback.print_exc()
+
+    def _add_test_ws_html(self):
+        from fastapi.responses import HTMLResponse
+        html = """
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Chat</title>
+                </head>
+                <body>
+                    <h1>WebSocket Testing</h1>
+                    <form action="" onsubmit="sendMessage(event)">
+                        <input type="text" id="messageText" autocomplete="off"/>
+                        <button>Send</button>
+                    </form>
+                    <ul id='messages'>
+                    </ul>
+                    <script>
+                        var ws = new WebSocket("ws://localhost:8000/ws");
+                        ws.onmessage = function(event) {
+                            var messages = document.getElementById('messages')
+                            var message = document.createElement('li')
+                            data = JSON.parse(event.data)
+                            var content = document.createTextNode(JSON.stringify(data.data))
+                            message.appendChild(content)
+                            messages.appendChild(message)
+                        };
+                        function sendMessage(event) {
+                            var input = document.getElementById("messageText")
+                            var data = { agent_input: input.value }
+                            var value = { data: data,  route: "/agent" }
+                            ws.send(JSON.stringify(value))
+                            input.value = ''
+                            event.preventDefault()
+                        }
+                    </script>
+                </body>
+            </html>
+            """
+        
+        async def get_html():
+            return HTMLResponse(html)
+        
+        self.app.add_api_route("/test_ws", get_html)
+        
