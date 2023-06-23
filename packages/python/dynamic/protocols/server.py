@@ -3,7 +3,7 @@ import uuid
 import orjson
 import traceback
 import logging
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
 # fastapi
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
@@ -13,36 +13,16 @@ from starlette.responses import FileResponse
 import uvicorn
 
 # dynamic
+from dynamic.classes.message import BaseMessage, ErrorMessage, IncomingMessage, OutgoingMessage
+from dynamic.router import Router, Route
 from dynamic.runners.utils import get_runner
 from dynamic.protocols.ws import ConnectionManager
-from dynamic.router import Router, Route
 
 # Exceptions
 class RouteNotFound(Exception):
     pass
 
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
-
-
-def parse_json_string(json_string):
-    try:
-        parsed_json = orjson.loads(json_string)
-        return parsed_json
-    except orjson.JSONDecodeError as e:
-        raise e
-
-
-def error_response(message="Unexpected Error", e=None):
-    # TODO: Remove
-    error_response = {"error": message, "details": str(e)}
-    return orjson.dumps(error_response).decode("utf-8")
-
-
-def run_agent(agent_func, json_data, send_msg):
-    logging.info(f"Running agent... {json_data}")
-    # look up if agent is already running
-    # might need to check what kind of agent
-
 
 class Server:
     app = FastAPI(debug=True)
@@ -140,33 +120,47 @@ class Server:
         )
 
     async def websocket_handler(self, websocket: WebSocket):
-        async def handle_msg(route, data):
-            logging.info(f"Processing handler message for route {route} data {data}")
+        async def handle_msg(recieved_message: IncomingMessage) -> Union[OutgoingMessage, ErrorMessage]:
+            logging.info(f"Processing message(id={recieved_message.id}) for route {recieved_message.route_path}")
             try:
                 # TODO: Remove self.routes and route data
-                route_data = self.routes[route]
+
+                # build runner and run incoming input
+                route_data = self.routes[recieved_message.route_path]
                 handle = route_data.get("handle")
                 runner = route_data.get("runner")
                 streaming = route_data.get("streaming")
                 runner_config_type = route_data.get("runner_config_type")
-                config = runner_config_type(**data)
+                config = runner_config_type(**recieved_message.config)
                 
-                await runner(handle, config, websocket=websocket, streaming=streaming).run()
-            except ValueError as e:
-                logging.error(f"ValueError while processing route {route}")
-                return error_response(f"ValueError for route {route}", e=e)
-            except Exception as e:
-                logging.error(f"Error processing handler message for route {route}")
-                traceback.print_exc()
-                return error_response(f"Can't handle message for route {route}", e=e)
+                output = await runner(handle, config, websocket=websocket, streaming=streaming).run()
 
-        async def send_msg(data, original_msg={}, broadcast=False):
-            # TODO: Create Message class
-            message = dict(
-                route=original_msg.get("route"),
-                message_id=original_msg.get("message_id"),
-                data=data,
-            )
+                # return processed message
+                # TODO: Possibly differenciate Incoming(has commands/inputs, configs, etc) and Outgoing(just content)
+                return OutgoingMessage(
+                    content=output,
+                    route_path=recieved_message.route_path
+                )
+            except ValueError as e:
+                err_content = f"ERROR: ValueError while processing Message(id={recieved_message.id}) on route path ({recieved_message.route_path})."
+                logging.error(err_content)
+                traceback.print_exc()
+                return ErrorMessage(
+                    content=err_content,
+                    route_path=recieved_message.route_path,
+                    error=e
+                )
+            except Exception as e:
+                err_content = f"ERROR: Unknown Error while processing Message(id={recieved_message.id}) on route path ({recieved_message.route_path})."
+                logging.error(err_content)
+                traceback.print_exc()
+                return ErrorMessage(
+                    content=err_content,
+                    route_path=recieved_message.route_path,
+                    error=e
+                )
+
+        async def send_msg(message: BaseMessage, broadcast: bool = False) -> None:
             logging.info(f"Sending message {message}")
             if broadcast:
                 await self.connection_manager.broadcast(message)
@@ -176,40 +170,46 @@ class Server:
         await self.connection_manager.connect(websocket)
         while True:
             try:
-                message = await websocket.receive_json()
-                logging.info(f"Received message {message}")
+                received_json = await websocket.receive_json()
+                incoming_message = IncomingMessage(**received_json)
+                logging.info(f"Received message: {incoming_message}")
 
+                route_path = incoming_message.route_path
 
-                if message.get("message_id") is None:
-                    message["message_id"] = str(uuid.uuid4())
-                route = message.get("route")
-
-                if route is None:
-                    err_message = f"Recieved a message without a route. Message - {str(message)}"
+                if route_path is None:
+                    err_message = f"Recieved a message without a route. Message - {incoming_message}"
                     logging.error(err_message)
                     raise RouteNotFound(err_message)
                 
-                if route in self.routes:
-                    logging.info(f"Found handler for route {route}")
-                    response = await handle_msg(route, message.get("data", {}))
-                    await send_msg(response, message)
+                if route_path in self.routes:
+                    logging.info(f"Found handler for route {route_path}")
+                    outgoing_message = await handle_msg(incoming_message)
+                    await send_msg(outgoing_message)
                 else:
-                    err_message = f"Route ({route}) not defined on the server."
+                    err_message = f"Route ({route_path}) not defined on the server."
                     logging.error(err_message)
                     raise RouteNotFound(err_message)
             except WebSocketDisconnect as e:
                 logging.info("WebSocketDisconnect")
                 await self.connection_manager.disconnect(websocket)
                 break
+            # TODO: Update error messaging
             except orjson.JSONDecodeError as e:
-                await send_msg(error_response(e=e))
+                err_content = f"ERROR: failed to handle recieve_json. {e.__class__.__name__} Recieved."
+                logging.error(err_content)
+                await send_msg(ErrorMessage(error=e, content=err_content))
             except KeyError as e:
-                await send_msg(error_response(e=e))
+                err_content = f"ERROR: failed to handle recieve_json. {e.__class__.__name__} Recieved."
+                logging.error(err_content)
+                await send_msg(ErrorMessage(error=e, content=err_content))
             except RouteNotFound as e:
-                await send_msg(error_response(e=e))
+                err_content = f"ERROR: failed to handle recieve_json. {e.__class__.__name__} Recieved."
+                logging.error(err_content)
+                await send_msg(ErrorMessage(error=e, content=err_content))
             except Exception as e:
-                logging.error("failed to handle recieve_json")
-                traceback.print_exc()
+                err_content = f"ERROR: Unknown failure to handle recieve_json. {e.__class__.__name__} Recieved."
+                logging.error(err_content)
+                await send_msg(ErrorMessage(error=e, content=err_content))
 
     def _add_test_ws_html(self):
         from fastapi.responses import HTMLResponse
@@ -239,8 +239,9 @@ class Server:
                         };
                         function sendMessage(event) {
                             var input = document.getElementById("messageText")
-                            var data = { input: input.value }
-                            var value = { data: data,  route: "/agent" }
+                            var content = input.value
+                            var config = { input: input.value }
+                            var value = { content: content, config: config,  route_path: "/agent" }
                             ws.send(JSON.stringify(value))
                             input.value = ''
                             event.preventDefault()
