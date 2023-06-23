@@ -1,9 +1,13 @@
 [tool.poetry]
 name = "dynamic"
-version = "0.1.0"
+version = "0.0.1"
 description = ""
-authors = ["Furqan Rydhan <furqan.rydhan@gmail.com>"]
+authors = [
+    "Furqan Rydhan <furqan.rydhan@gmail.com>",
+    "Aman Ibrahim <amanmibra@gmail.com>"
+]
 readme = "README.md"
+keywords = ["llm", "langchain"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
