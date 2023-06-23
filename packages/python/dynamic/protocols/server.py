@@ -15,6 +15,7 @@ import uvicorn
 # dynamic
 from dynamic.runners.utils import get_runner
 from dynamic.protocols.ws import ConnectionManager
+from dynamic.router import Router, Route
 
 # Exceptions
 class RouteNotFound(Exception):
@@ -47,15 +48,21 @@ class Server:
     app = FastAPI(debug=True)
     routes = {}
 
-    def __init__(self, routes, host="0.0.0.0", port=8000, static_dir=None):
+    def __init__(
+            self,
+            router: Router,
+            host: str ="0.0.0.0",
+            port: int = 8000,
+            static_dir: Any = None
+        ):
         self.host = host
         self.port = port
         self.connection_manager = ConnectionManager()
+        self.router = router
 
-        for route in routes:
-            handle = routes[route]
-            logging.info(f"Adding route {route}")
-            self.add_route(route, handle)
+        for route in router.routes:
+            logging.info(f"Adding route /{route.path}")
+            self.add_route(route)
         
 
         # Enable CORS for your frontend domain
@@ -91,18 +98,21 @@ class Server:
 
         self.app.websocket("/ws")(self.websocket_handler)
 
-    def add_route(self, route: str, handle: Callable) -> None:
-        # TODO: Create Routes and Route classes
-        # check route intance type
+    def add_route(self, route: Route) -> None:
+        """Dynamically add static routes"""
+        handle = route.handle
+        path = route.path
         runner, runner_config_type = get_runner(handle)
 
-        self.routes[route] = dict(
+        self.routes[path] = dict(
             handle=handle,
             runner=runner,
             runner_config_type=runner_config_type,
+            streaming=route.streaming,
         )
 
         async def run_route(req: Request):
+            """Non-streaming simple route"""
             # collect data
             data = await req.json()
 
@@ -113,13 +123,13 @@ class Server:
 
             # run runner and return output
             config = runner_config_type(**config_dict)
-            output = runner(handle, config).run()
+            output = runner(handle, config, streaming=False).run()
             return dict(
                 message="Ran subroute successfully!",
                 output=output
             )
         
-        api_path = f"/{route}"
+        api_path = f"/{path}"
         self.app.add_api_route(api_path, run_route, methods=["GET", "POST"])
 
     def start(self):
@@ -135,13 +145,15 @@ class Server:
         async def handle_msg(route, data):
             logging.info(f"Processing handler message for route {route} data {data}")
             try:
+                # TODO: Remove self.routes and route data
                 route_data = self.routes[route]
                 handle = route_data.get("handle")
                 runner = route_data.get("runner")
+                streaming = route_data.get("streaming")
                 runner_config_type = route_data.get("runner_config_type")
                 config = runner_config_type(**data)
                 
-                await runner(handle, config, websocket=websocket).run()
+                await runner(handle, config, websocket=websocket, streaming=streaming).run()
             except ValueError as e:
                 logging.error(f"ValueError while processing route {route}")
                 return error_response(f"ValueError for route {route}", e=e)
