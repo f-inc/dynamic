@@ -13,7 +13,7 @@ class ChainRunnerConfig:
     prompt_input: Union[str, Dict[str, str]]
 
 class ChainRunner(Runner):
-    def __init__(self, handle: Chain, config: ChainRunnerConfig):
+    def __init__(self, handle: Chain, config: ChainRunnerConfig, **kwargs):
         if not isinstance(handle, Chain):
             raise ValueError(f"ChainRunner requires handle to be a Langchain Chain. Instead got {type(handle)}.")
         
