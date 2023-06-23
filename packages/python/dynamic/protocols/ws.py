@@ -3,6 +3,8 @@ from typing import Any, Dict, List
 
 from fastapi import WebSocket
 
+from dynamic.classes.message import IncomingMessage
+
 handlers = {}
 
 
@@ -29,9 +31,9 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def send_message(self, message: Dict[str, Any], websocket: WebSocket):
-        await websocket.send_json(message)
+    async def send_message(self, message: IncomingMessage, websocket: WebSocket):
+        await websocket.send_json(message.to_dict())
 
-    async def broadcast(self, message: Dict[str, Any]):
+    async def broadcast(self, message: IncomingMessage):
         for connection in self.active_connections:
-            await connection.send_json(message)
+            await connection.send_json(message.to_dict())
