@@ -130,7 +130,7 @@ class Server:
         )
 
     async def websocket_handler(self, websocket: WebSocket):
-        def handle_msg(route, data):
+        async def handle_msg(route, data):
             logging.info(f"Processing handler message for route {route} data {data}")
             try:
                 route_data = self.routes[route]
@@ -139,7 +139,7 @@ class Server:
                 runner_config_type = route_data.get("runner_config_type")
                 config = runner_config_type(**data)
                 
-                return runner(handle, config, websocket=websocket).run()
+                await runner(handle, config, websocket=websocket).run()
             except ValueError as e:
                 logging.error(f"ValueError while processing route {route}")
                 return error_response(f"ValueError for route {route}", e=e)
@@ -179,7 +179,7 @@ class Server:
                 
                 if route in self.routes:
                     logging.info(f"Found handler for route {route}")
-                    response = handle_msg(route, message.get("data", {}))
+                    response = await handle_msg(route, message.get("data", {}))
                     await send_msg(response, message)
                 else:
                     err_message = f"Route ({route}) not defined on the server."
