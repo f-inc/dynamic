@@ -2,14 +2,11 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 # dyanmic imports
-from dynamic.runners.runner import Runner
-
+from dynamic.runners.runner import Runner, RunnerConfig
 
 @dataclass
-class CallableRunnerConfig:
-    params: Any
-
-    
+class CallableRunnerConfig(RunnerConfig):
+    params: Any  
 
 class CallableRunner(Runner):
     def __init__(self, handle: Callable, config: CallableRunnerConfig):
