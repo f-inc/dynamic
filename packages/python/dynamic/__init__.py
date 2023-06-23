@@ -21,7 +21,10 @@ def start_server(
     ):
     if routes:
         routes = [
-            Route(handle=handle, path=path) for path, handle in routes.items()
+            Route(
+                handle=handle,
+                path=path
+            ) for path, handle in routes.items()
         ]
 
         if router:
