@@ -13,7 +13,7 @@ from starlette.responses import FileResponse
 import uvicorn
 
 # dynamic
-from dynamic.classes.message import BaseMessage, ErrorMessage, IncomingMessage, OutgoingMessage
+from dynamic.classes.message import BaseMessage, ErrorMessage, ClientMessage, ServerMessage
 from dynamic.router import Router, Route
 from dynamic.runners.utils import get_runner
 from dynamic.protocols.ws import ConnectionManager
@@ -120,7 +120,7 @@ class Server:
         )
 
     async def websocket_handler(self, websocket: WebSocket):
-        async def handle_msg(recieved_message: IncomingMessage) -> Union[OutgoingMessage, ErrorMessage]:
+        async def handle_msg(recieved_message: ClientMessage) -> Union[ServerMessage, ErrorMessage]:
             logging.info(f"Processing message(id={recieved_message.id}) for route {recieved_message.route_path}")
             try:
                 # TODO: Remove self.routes and route data
@@ -137,7 +137,7 @@ class Server:
 
                 # return processed message
                 # TODO: Possibly differenciate Incoming(has commands/inputs, configs, etc) and Outgoing(just content)
-                return OutgoingMessage(
+                return ServerMessage(
                     content=output,
                     route_path=recieved_message.route_path
                 )
@@ -171,7 +171,7 @@ class Server:
         while True:
             try:
                 received_json = await websocket.receive_json()
-                incoming_message = IncomingMessage(**received_json)
+                incoming_message = ClientMessage(**received_json)
                 logging.info(f"Received message: {incoming_message}")
 
                 route_path = incoming_message.route_path
