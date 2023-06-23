@@ -24,4 +24,4 @@ agent = DynamicAgent(
 )
 
 if __name__ == "__main__":
-    start_server(routes={"/agent": agent}, test_ws=True)
+    start_server(routes={"agent": agent}, test_ws=True)

@@ -56,25 +56,7 @@ class Server:
             handle = routes[route]
             logging.info(f"Adding route {route}")
             self.add_route(route, handle)
-            
-            async def run_route(req: Request):
-                # collect data
-                data = await req.json()
-
-                # setup runner config
-                config_dict = data.get("config")
-                runner = self.routes[route].get("runner")
-                runner_config_type = self.routes[route].get("runner_config_type")
-
-                # run runner and return output
-                config = runner_config_type(**config_dict)
-                output = runner(handle, config).run()
-                return dict(
-                    message="Ran subroute successfully!",
-                    output=output
-                )
-            
-            self.app.add_api_route(route, run_route, methods=["GET", "POST"])
+        
 
         # Enable CORS for your frontend domain
         self.app.add_middleware(
@@ -119,6 +101,26 @@ class Server:
             runner=runner,
             runner_config_type=runner_config_type,
         )
+
+        async def run_route(req: Request):
+            # collect data
+            data = await req.json()
+
+            # setup runner config
+            config_dict = data.get("config")
+            runner = self.routes[route].get("runner")
+            runner_config_type = self.routes[route].get("runner_config_type")
+
+            # run runner and return output
+            config = runner_config_type(**config_dict)
+            output = runner(handle, config).run()
+            return dict(
+                message="Ran subroute successfully!",
+                output=output
+            )
+        
+        api_path = f"/{route}"
+        self.app.add_api_route(api_path, run_route, methods=["GET", "POST"])
 
     def start(self):
         logging.info(f"Starting server on host:port {self.host}:{self.port}")
