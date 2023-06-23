@@ -17,10 +17,10 @@ from dynamic.classes.agent import DynamicAgent
 
 llm = OpenAI(temperature=0, streaming=True, verbose=True)
 
-tools = load_tools(["wikipedia"])
+tool_list = ["google-serper"]
 
 agent = DynamicAgent(
-    tools=tools, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True,
+    tool_list=tool_list, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True,
 )
 
 if __name__ == "__main__":

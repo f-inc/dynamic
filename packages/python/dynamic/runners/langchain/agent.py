@@ -1,17 +1,15 @@
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Union, Dict, Optional
-import logging
+from typing import Union, Dict, Optional
 
 from fastapi import WebSocket
 
 # dyanmic
 from dynamic.runners.runner import Runner
+from dynamic.classes.agent import DynamicAgent
 
 # langchain
 from langchain.agents import Agent, AgentExecutor, initialize_agent
-from langchain.callbacks.base import AsyncCallbackHandler
-from langchain.agents import load_tools
 
 
 @dataclass
@@ -20,26 +18,18 @@ class AgentRunnerConfig:
     streaming: bool = True
 
 class AgentRunner(Runner):
-    def __init__(self, handle: Union[Agent, AgentExecutor], config: AgentRunnerConfig, websocket: Optional[WebSocket] = None):
+    def __init__(self, handle: Union[DynamicAgent, Agent, AgentExecutor], config: AgentRunnerConfig, websocket: Optional[WebSocket] = None):
         self.streaming = False
+        self.config = config
 
-        if config.streaming:
-            # mark Runner as streaming
+        if self.config.streaming:
+            # mark runner as streaming
             self.streaming = True
 
-            # Setup LLM for streaming
-            llm = handle.kwargs.get("llm")
-            llm.streaming = True
-            llm.verbose = True
-            llm.callbacks = [WebsocketCallbackHandler(websocket)]
+            if not isinstance(handle, DynamicAgent):
+                raise ValueError(f"A streaming Agent needs to a DynamicAgent, recieved {type(handle)}.")
 
-            # Update Handle
-            handle.kwargs["llm"] = llm
-            handle.kwargs["tools"] = load_tools(["google-serper"], llm=llm)
-
-            # Init AgentExecutor
-            logging.info(f"Initializing agent with following kwargs: \n{handle.kwargs}")
-            handle = initialize_agent(**handle.kwargs)
+            handle = handle._initialize_agent(websocket)
 
         if not (isinstance(handle, Agent) or isinstance(handle, AgentExecutor)):
             raise ValueError(f"AgentRunner requires handle to be a Langchain Agent or AgentExecutor. Instead got {type(handle)}.")
@@ -55,11 +45,4 @@ class AgentRunner(Runner):
 
 
 
-class WebsocketCallbackHandler(AsyncCallbackHandler):
-    def __init__(self, websocket: WebSocket):
-        super().__init__()
-        self.websocket = websocket
 
-    async def on_llm_new_token(self, token: str, **kwargs) -> None:
-        logging.info(f"on new token {token}")
-        await self.websocket.send_json(dict(data=token))
