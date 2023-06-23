@@ -139,12 +139,13 @@ class Server:
                 runner_config_type = route_data.get("runner_config_type")
                 config = runner_config_type(**data)
                 
-                return runner(handle, config).run()
+                return runner(handle, config, websocket=websocket).run()
             except ValueError as e:
                 logging.error(f"ValueError while processing route {route}")
-                return error_response(f"Can't handle message for route {route}", e=e)
+                return error_response(f"ValueError for route {route}", e=e)
             except Exception as e:
                 logging.error(f"Error processing handler message for route {route}")
+                traceback.print_exc()
                 return error_response(f"Can't handle message for route {route}", e=e)
 
         async def send_msg(data, original_msg={}, broadcast=False):
@@ -207,7 +208,7 @@ class Server:
                     <title>Chat</title>
                 </head>
                 <body>
-                    <h1>WebSocket Chat</h1>
+                    <h1>WebSocket Testing</h1>
                     <form action="" onsubmit="sendMessage(event)">
                         <input type="text" id="messageText" autocomplete="off"/>
                         <button>Send</button>
@@ -219,14 +220,15 @@ class Server:
                         ws.onmessage = function(event) {
                             var messages = document.getElementById('messages')
                             var message = document.createElement('li')
-                            var content = document.createTextNode(event.data)
+                            data = JSON.parse(event.data)
+                            var content = document.createTextNode(JSON.stringify(data.data))
                             message.appendChild(content)
                             messages.appendChild(message)
                         };
                         function sendMessage(event) {
                             var input = document.getElementById("messageText")
-                            var data = { prompt_input: input.value }
-                            var value = { data: data,  route: "/chain" }
+                            var data = { agent_input: input.value }
+                            var value = { data: data,  route: "/agent" }
                             ws.send(JSON.stringify(value))
                             input.value = ''
                             event.preventDefault()
