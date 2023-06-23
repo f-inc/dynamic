@@ -15,7 +15,7 @@ from langchain.agents import Agent, AgentExecutor, initialize_agent
 @dataclass
 class AgentRunnerConfig:
     agent_input: Union[str, Dict[str, str]]
-    streaming: bool = True
+    streaming: bool = False
 
 class AgentRunner(Runner):
     def __init__(self, handle: Union[DynamicAgent, Agent, AgentExecutor], config: AgentRunnerConfig, websocket: Optional[WebSocket] = None):

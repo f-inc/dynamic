@@ -1,6 +1,7 @@
 """
 Example Script
 """
+import asyncio
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -29,4 +30,4 @@ if __name__ == "__main__":
     runner = AgentRunner(agent, config)
 
     print("Runner created and running...")
-    print(runner.run())
+    asyncio.run(runner.run())
