@@ -13,6 +13,7 @@ from starlette.responses import FileResponse
 import uvicorn
 
 # dynamic
+from dynamic.classes.agent import DynamicAgent
 from dynamic.classes.message import BaseMessage, ErrorMessage, ClientMessage, ServerMessage
 from dynamic.router import Router, Route
 from dynamic.runners.utils import get_runner
@@ -77,6 +78,9 @@ class Server:
             )
 
         self.app.websocket("/ws")(self.websocket_handler)
+        for route in router.routes:
+            if route.streaming and isinstance(route.handle, DynamicAgent):
+                self.app.websocket(f"/{route.path}")(self.websocket_handler)
 
     def add_route(self, route: Route) -> None:
         """Dynamically add static routes"""
@@ -227,7 +231,7 @@ class Server:
                     <p id='messages'>
                     </p>
                     <script>
-                        var ws = new WebSocket("ws://localhost:8000/ws");
+                        var ws = new WebSocket("ws://localhost:8000/agent");
                         ws.onmessage = function(event) {
                             var messages = document.getElementById('messages')
                             data = JSON.parse(event.data)

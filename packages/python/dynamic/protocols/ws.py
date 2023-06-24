@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from fastapi import WebSocket
 
-from dynamic.classes.message import BaseMessage, ErrorMessage
+from dynamic.classes.message import BaseMessage
 
 class ConnectionManager:
     """WebSocket connection manager."""
