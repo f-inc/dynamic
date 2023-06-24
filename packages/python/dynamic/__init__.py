@@ -1,10 +1,11 @@
 import os
 import logging
-from typing import Any, Optional
+from typing import Any, List, Optional
 
-from dynamic.protocols.server import Server
 from dynamic.classes.logger import setup_logging
+from dynamic.protocols.server import Server
 from dynamic.router import Router, Route
+from dynamic.router.get_file_routes import get_file_routes, is_file_based_routing
 
 host = os.environ.get("HOST", "0.0.0.0")
 port = int(os.environ.get("PORT", 8000))
@@ -15,10 +16,23 @@ setup_logging()
 
 def start_server(
         router: Router = Router(routes=[]),
-        routes: Any = None,
+        routes: Optional[List[Any]] = None,
         static_dir=None,
         test_ws=False
     ):
+    
+    router = _handle_router(router, routes)
+
+    logging.info(f"Starting server on {host}:{port}")
+    server = Server(router, host=host, port=port, static_dir=static_dir)
+    if test_ws:
+        server._add_test_ws_html()
+    server.start()
+
+    return server
+
+def _handle_router(router: Router, routes: Optional[List[Any]]) -> Router:
+    # get path of excuting script
     if routes:
         routes = [
             Route(
@@ -30,12 +44,12 @@ def start_server(
         if router:
             router.routes += routes
         else:
-            Router(routes=routes)
+            router = Router(routes=routes)
+    
+    if is_file_based_routing():
+        # TODO: Handle file routes, add them to the Router OR replace Router
+        return router
 
-    logging.info(f"Starting server on {host}:{port}")
-    server = Server(router, host=host, port=port, static_dir=static_dir)
-    if test_ws:
-        server._add_test_ws_html()
-    server.start()
+    return router
 
-    return server
+
