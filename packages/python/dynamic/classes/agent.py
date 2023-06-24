@@ -8,6 +8,9 @@ from fastapi import WebSocket
 from langchain.agents import load_tools, initialize_agent
 from langchain.callbacks.base import AsyncCallbackHandler
 
+# dynamic
+from dynamic.classes.message import ServerMessage
+
 
 class DynamicAgent:
     def __init__(self, llm, **kwargs):
@@ -37,4 +40,7 @@ class WebsocketCallbackHandler(AsyncCallbackHandler):
         self.websocket = websocket
 
     async def on_llm_new_token(self, token: str, **kwargs) -> None:
-        await self.websocket.send_json(dict(data=token))
+        messsage = ServerMessage(
+            content=token
+        )
+        await self.websocket.send_json(messsage.to_dict())
