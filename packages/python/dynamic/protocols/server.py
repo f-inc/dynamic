@@ -225,17 +225,15 @@ class Server:
                         <input type="text" id="messageText" autocomplete="off"/>
                         <button>Send</button>
                     </form>
-                    <ul id='messages'>
-                    </ul>
+                    <p id='messages'>
+                    </p>
                     <script>
                         var ws = new WebSocket("ws://localhost:8000/ws");
                         ws.onmessage = function(event) {
                             var messages = document.getElementById('messages')
-                            var message = document.createElement('li')
                             data = JSON.parse(event.data)
-                            var content = document.createTextNode(JSON.stringify(data.data))
-                            message.appendChild(content)
-                            messages.appendChild(message)
+                            var content = document.createTextNode(data.content)
+                            messages.appendChild(content)
                         };
                         function sendMessage(event) {
                             var input = document.getElementById("messageText")
