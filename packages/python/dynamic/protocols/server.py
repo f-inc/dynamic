@@ -136,7 +136,6 @@ class Server:
                 output = await runner(handle, config, websocket=websocket, streaming=streaming).run()
 
                 # return processed message
-                # TODO: Possibly differenciate Incoming(has commands/inputs, configs, etc) and Outgoing(just content)
                 return ServerMessage(
                     content=output,
                     route_path=recieved_message.route_path

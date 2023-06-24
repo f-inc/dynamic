@@ -25,7 +25,6 @@ class DynamicAgent:
         llm.verbose = True
         llm.callbacks = [WebsocketCallbackHandler(websocket)]
 
-        # TODO: Setup tools for either list of string or already pre_loaded
         tool_list = self.kwargs.get("tool_list")
         if tool_list:
             self.kwargs["tools"] = load_tools(tool_list, llm=llm)
