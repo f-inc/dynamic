@@ -160,13 +160,13 @@ class Server:
                 )
 
         async def send_msg(message: BaseMessage, broadcast: bool = False) -> None:
-            logging.info(f"Sending message {message}")
+            logging.info(f"Sending message {message.to_json_dump()}")
             if broadcast:
                 await self.connection_manager.broadcast(message)
             else:
-                await self.connection_manager.send_message(message, websocket)
+                await self.connection_manager.send_message(websocket, message)
 
-        await self.connection_manager.connect(websocket)
+        websocket_id = await self.connection_manager.connect(websocket)
         while True:
             try:
                 received_json = await websocket.receive_json()
@@ -190,7 +190,7 @@ class Server:
                     raise RouteNotFound(err_message)
             except WebSocketDisconnect as e:
                 logging.info("WebSocketDisconnect")
-                await self.connection_manager.disconnect(websocket)
+                await self.connection_manager.disconnect(websocket_id)
                 break
             # TODO: Update error messaging
             except orjson.JSONDecodeError as e:
