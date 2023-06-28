@@ -5,7 +5,6 @@ def handler(req: Request):
         return get_foo()
     return all_foo()
 
-@dynamic
 def get_foo():
     return 'get-foo'
 
