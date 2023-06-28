@@ -36,19 +36,17 @@ def _handle_router(router: Router, routes: Optional[List[Any]]) -> Router:
     if routes:
         routes = [
             Route(
+                path=path,
                 handle=handle,
-                path=path
             ) for path, handle in routes.items()
         ]
+        if has_file_based_routing():
+            routes += get_file_routes()
 
         if router:
             router.routes += routes
         else:
             router = Router(routes=routes)
-    
-    if has_file_based_routing():
-        # TODO: Handle file routes, add them to the Router OR replace Router
-        return router
 
     return router
 

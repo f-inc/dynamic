@@ -4,18 +4,26 @@ import inspect
 import sys
 import logging
 
+from dynamic.router.router import Route
+
 MODULE_EXTENSIONS = '.py'
 DEFAULT_ROUTES_DIRECTORY = "/routes"
 DEFAULT_HANDLER_NAME = "handler"
 
 def get_file_routes():
     packages = [_get_package_contents(package) for package in _get_list_of_routes()]
-    functions = {
+    handlers = {
         _get_route_name(package.__file__): _get_valid_module_functions(package)
         for package in packages
     }
+    routes = []
 
-    return functions
+    for path, handle in handlers.items():
+        if handle:
+            route = Route(path=path, handle=handle, streaming=False)
+            routes.append(route)
+
+    return routes
 
 def has_file_based_routing():
     cwd = os.getcwd()
