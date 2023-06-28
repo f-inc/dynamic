@@ -2,9 +2,11 @@ import importlib.util
 import os
 import inspect
 import sys
+import logging
 
 MODULE_EXTENSIONS = '.py'
 DEFAULT_ROUTES_DIRECTORY = "/routes"
+DEFAULT_HANDLER_NAME = "handler"
 
 def get_file_routes():
     packages = [_get_package_contents(package) for package in _get_list_of_routes()]
@@ -22,14 +24,21 @@ def has_file_based_routing():
 
     return os.path.exists(path)
 
+####################
+# Helper Functions #
+####################
+
 def _get_valid_module_functions(package):
     module_members = inspect.getmembers(package, inspect.isfunction)
-    valid_functions = []
-    for _, func in module_members:
-        if getattr(func, 'is_wrapped', False):
-            valid_functions.append(func)
     
-    return valid_functions
+    for name, func in module_members:
+        if name == DEFAULT_HANDLER_NAME:
+            return func
+    
+    file_path = package.__file__.split(DEFAULT_ROUTES_DIRECTORY)[1]
+    logging.warn(f"The module at {file_path} does not have a handler function. Expected a function named '{DEFAULT_HANDLER_NAME}', did not find.")
+
+    return None
 
 def _get_package_contents(file_path):
     spec = importlib.util.spec_from_file_location(file_path, location=file_path)

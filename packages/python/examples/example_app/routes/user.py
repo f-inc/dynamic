@@ -1,15 +1,13 @@
-from dynamic.router.decorator import dynamic
+from fastapi import Request
+
+def handler(req: Request):
+    if req.method == "GET":
+        return get_foo()
+    return all_foo()
 
 @dynamic
 def get_foo():
+    return 'get-foo'
+
+def all_foo():
     return 'foo'
-
-def delete_foo():
-    return 'foo-delete'
-
-class User:
-    def __init__():
-        pass
-
-    def test():
-        pass
