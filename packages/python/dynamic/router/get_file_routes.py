@@ -4,7 +4,7 @@ import inspect
 import sys
 import logging
 
-from dynamic.router.router import Route
+from dynamic.router import Route
 
 MODULE_EXTENSIONS = '.py'
 DEFAULT_ROUTES_DIRECTORY = "/routes"
