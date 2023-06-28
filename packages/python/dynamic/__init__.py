@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 from dynamic.classes.logger import setup_logging
 from dynamic.protocols.server import Server
 from dynamic.router import Router, Route
-from dynamic.router.get_file_routes import get_file_routes, is_file_based_routing
+from dynamic.router.get_file_routes import get_file_routes, has_file_based_routing
 
 host = os.environ.get("HOST", "0.0.0.0")
 port = int(os.environ.get("PORT", 8000))
@@ -46,7 +46,7 @@ def _handle_router(router: Router, routes: Optional[List[Any]]) -> Router:
         else:
             router = Router(routes=routes)
     
-    if is_file_based_routing():
+    if has_file_based_routing():
         # TODO: Handle file routes, add them to the Router OR replace Router
         return router
 
