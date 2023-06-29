@@ -23,14 +23,14 @@ def get_file_routes():
             route = Route(path=path, handle=handle, streaming=False)
             routes.append(route)
 
+    logging.info(f"Grabbing {len(routes)} file-based routes...")
+
     return routes
 
 def has_file_based_routing():
-    cwd = os.getcwd()
-    path = os.path.abspath(cwd)
-    path = os.path.normpath(path + DEFAULT_ROUTES_DIRECTORY)
+    route_dir_path = _get_route_dir_path()
 
-    return os.path.exists(path)
+    return os.path.exists(route_dir_path)
 
 ####################
 # Helper Functions #
@@ -63,11 +63,9 @@ def _get_route_name(file_path):
     return route_path
 
 def _get_list_of_routes():
-    cwd = os.getcwd()
-    path = os.path.abspath(cwd)
-    path = os.path.normpath(path + DEFAULT_ROUTES_DIRECTORY)
+    route_dir_path = _get_route_dir_path()
 
-    _, files = _run_fast_scandir(path, [".py"])
+    _, files = _run_fast_scandir(route_dir_path, [".py"])
 
     files = [f for f in files if "__" not in f]
 
@@ -89,3 +87,9 @@ def _run_fast_scandir(dir, ext):    # dir: str, ext: list
         subfolders.extend(sf)
         files.extend(f)
     return subfolders, files
+
+def _get_route_dir_path():
+    path = os.path.dirname(os.path.abspath(sys.argv[0]))
+    path = os.path.normpath(path + DEFAULT_ROUTES_DIRECTORY)
+
+    return path
