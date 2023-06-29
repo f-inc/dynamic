@@ -1,3 +1,9 @@
+"""
+File based routing is meant to skip this file
+"""
+def handler():
+    pass
+
 def get_foo():
     return 'foo'
 
