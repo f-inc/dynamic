@@ -2,11 +2,11 @@ from fastapi import Request
 
 def handler(req: Request):
     if req.method == "GET":
-        return get_foo()
-    return all_foo()
+        return get_user()
+    return all_user()
 
-def get_foo():
-    return 'get-foo'
+def get_user():
+    return dict(message="Ran get_user()")
 
-def all_foo():
-    return 'foo'
+def all_user():
+    return dict(message="Ran all_user()")
