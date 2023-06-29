@@ -40,13 +40,17 @@ def _handle_router(router: Router, routes: Optional[List[Any]]) -> Router:
                 handle=handle,
             ) for path, handle in routes.items()
         ]
-        if has_file_based_routing():
-            routes += get_file_routes()
+    else:
+        routes = []
 
-        if router:
-            router.routes += routes
-        else:
-            router = Router(routes=routes)
+    if has_file_based_routing():
+        logging.info("Building file based routes...")
+        routes += get_file_routes()
+
+    if router:
+        router.routes += routes
+    else:
+        router = Router(routes=routes)
 
     return router
 
