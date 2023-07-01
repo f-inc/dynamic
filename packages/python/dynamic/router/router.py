@@ -11,7 +11,7 @@ class RouteType(Enum):
 class Route:
     path: str
     handle: Callable
-    static: bool = False
+    inline: bool = False
     streaming: bool = False
     # TODO: Implement type
     type: Optional[RouteType] = None
