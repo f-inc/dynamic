@@ -24,7 +24,7 @@ if __name__ == "__main__":
             Route(
                 handle=agent,
                 streaming=True,
-                path="agent",
+                path="/agent",
             )
         ]
     )
