@@ -42,7 +42,6 @@ class Server:
         self.router = router
 
         for route in router.routes:
-            logging.info(f"Adding route {route.path}")
             self.add_route(route)
         
 
@@ -78,9 +77,6 @@ class Server:
             )
 
         self.app.websocket("/ws")(self.websocket_handler)
-        for route in router.routes:
-            if route.streaming and isinstance(route.handle, DynamicAgent):
-                self.app.websocket(route.path)(self.websocket_handler)
 
     def add_route(self, route: Route) -> None:
         """Dynamically add static routes"""
@@ -113,8 +109,13 @@ class Server:
             )
         
         if route.static:
+            logging.info(f"Adding static route {route.path}")
             self.app.add_api_route(path, run_static_route, methods=["GET", "POST"])
+        elif route.streaming and isinstance(route.handle, DynamicAgent):
+            logging.info(f"Adding websocket route {route.path}")
+            self.app.websocket(route.path)(self.websocket_handler)
         else:
+            logging.info(f"Adding route {route.path}")
             self.app.add_api_route(path, handle, methods=["GET", "PUT", "POST", "DELETE"])
 
     def start(self):
