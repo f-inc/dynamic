@@ -42,7 +42,6 @@ class Server:
         self.router = router
 
         for route in router.routes:
-            logging.info(f"Adding route /{route.path}")
             self.add_route(route)
         
 
@@ -78,25 +77,22 @@ class Server:
             )
 
         self.app.websocket("/ws")(self.websocket_handler)
-        for route in router.routes:
-            if route.streaming and isinstance(route.handle, DynamicAgent):
-                self.app.websocket(f"/{route.path}")(self.websocket_handler)
 
     def add_route(self, route: Route) -> None:
-        """Dynamically add static routes"""
+        """Dynamically add routes"""
         handle = route.handle
         path = route.path
-        api_path = f"/{path}"
         runner, runner_config_type = get_runner(handle)
 
-        self.routes[api_path] = dict(
+        self.routes[path] = dict(
             handle=handle,
             runner=runner,
             runner_config_type=runner_config_type,
+            inline=route.inline,
             streaming=route.streaming,
         )
 
-        async def run_route(req: Request):
+        async def run_inline_route(req: Request):
             """Non-streaming simple route"""
             # collect data
             data = await req.json()
@@ -108,11 +104,19 @@ class Server:
             config = runner_config_type(**config_dict)
             output = runner(handle, config, streaming=False).run()
             return dict(
-                message="Ran subroute successfully!",
+                message="Ran inline route successfully!",
                 output=output
             )
         
-        self.app.add_api_route(api_path, run_route, methods=["GET", "POST"])
+        if route.inline:
+            logging.info(f"Adding inline route {route.path}")
+            self.app.add_api_route(path, run_inline_route, methods=["GET", "POST"])
+        elif route.streaming and isinstance(route.handle, DynamicAgent):
+            logging.info(f"Adding websocket route {route.path}")
+            self.app.websocket(route.path)(self.websocket_handler)
+        else:
+            logging.info(f"Adding route {route.path}")
+            self.app.add_api_route(path, handle, methods=["GET", "PUT", "POST", "DELETE"])
 
     def start(self):
         logging.info(f"Starting server on host:port {self.host}:{self.port}")

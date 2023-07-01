@@ -20,4 +20,4 @@ prompt = PromptTemplate(
 chain = LLMChain(llm=llm, prompt=prompt)
 
 if __name__ == "__main__":
-    start_server(routes={"chain": chain}, test_ws=True)
+    start_server(routes={"/chain": chain}, test_ws=True)
