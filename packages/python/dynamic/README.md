@@ -56,6 +56,29 @@ As of right now, the following features for an API built on dynamic are availabl
 
 ### Project Structure
 
+Typically your root directory should have a server/app script that initiates your run. And then if you opt for file-based routing, a folder named `routes` in which the endpoint logic is stored. More details on routing will be in the next section.
+
+```bash
+# example file structure tree
+.
+└── my_app/
+    ├── routes/
+    │   └── foo/
+    │       └── bar.py
+    └── app.py
+```
+
+And `app.py` could look like the following:
+
+```python
+from dynamic import start_server
+
+if __name__ == "__main__":
+    start_server()
+```
+
+Run with `python app.py`.
+
 ### Routing
 
 ### Callables
