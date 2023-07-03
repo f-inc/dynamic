@@ -10,13 +10,14 @@ Easy-to-use framework to enable building, deploying, and scaling LLM application
 
 1. [Getting Started](#getting-started)
    a. [Installation](#installation)
-   b. [Concepts](#concepts)
+   <!-- b. [Concepts](#concepts) -->
 2. [Building Your Application](#building-your-application)
-   a. [Project Structure](#project-structure)
-   b. [Routing](#routing)
-   c. [Callables](#callables)
-   d. [Langchain Chains](#langchain-chains)
+   a. [Dynamic Alpha - what can you do?](#dynamic-alpha---what-can-you-do)
+   b. [Project Structure](#project-structure)
+   c. [Routing](#routing)
+   d. [Callables](#callables)
    e. [Langchain Agents](#langchain-agents)
+   f. [Langchain Chains](#langchain-chains)
 
 ## Getting Started
 
@@ -39,9 +40,19 @@ $ pip install dist/dynamic-0.0.1-py3-none-any.whl
 $ python -c "import dynamic"
 ```
 
-### Concepts
+<!-- ### Concepts -->
 
 ## Building Your Application
+
+### Dynamic Alpha - what can you do?
+
+As of right now, the following features for an API built on dynamic are available:
+
+1. Simple, normal `GET`, `PUT`, `POST`, and `DELETE` endpoints are represented by a callable function.
+
+2. Given a langchain chain or agent, a simple endpoint will be generated that will return agent/chain output given a prompt.
+
+3. Given an agent, a websocket endpoint can be generated that will stream all of the agent's output in real-time.
 
 ### Project Structure
 
