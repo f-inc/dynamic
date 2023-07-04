@@ -1,6 +1,6 @@
 # Dynamic ⚡️
 
-**Disclaimer:** This documentation is intended for the alpha founders.inc community launch. Some portions of this documentation, such as the setup, are expected to change. Please keep that in mind for future reference.
+**Disclaimer:** This documentation is intended for the alpha F.inc Community launch. Some portions of this documentation, such as the setup, are expected to change. Please keep that in mind for future reference.
 
 ## What is Dynamic?
 
