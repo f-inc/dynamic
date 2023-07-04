@@ -9,14 +9,22 @@ Easy-to-use framework to enable building, deploying, and scaling LLM application
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
+
    a. [Installation](#installation)
    <!-- b. [Concepts](#concepts) -->
+
 2. [Building Your Application](#building-your-application)
+
    a. [Dynamic Alpha - what can you do?](#dynamic-alpha---what-can-you-do)
+
    b. [Project Structure](#project-structure)
+
    c. [Routing](#routing)
+
    d. [Callables](#callables)
+
    e. [Langchain Agents](#langchain-agents)
+
    f. [Langchain Chains](#langchain-chains)
 
 ## Getting Started
