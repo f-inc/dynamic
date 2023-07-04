@@ -8,7 +8,8 @@ if __name__ == "__main__":
 
     langchain_routes = [
         Route(path="/agent", handle=agent, inline=True),
-        Route(path="/agent", handle=streaming_agent, streaming=True),Route(path="/chain", handle=chain, inline=True)
+        Route(path="/agent", handle=streaming_agent, streaming=True),
+        Route(path="/chain", handle=chain, inline=True),
     ]
 
     start_server(router=Router(routes=langchain_routes), test_ws=True)
