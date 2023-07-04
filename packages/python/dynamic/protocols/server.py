@@ -27,7 +27,7 @@ parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Server:
     app = FastAPI(debug=True)
-    routes = {}
+    routes_map = {}
 
     def __init__(
             self,
@@ -84,7 +84,7 @@ class Server:
         path = route.path
         runner, runner_config_type = get_runner(handle)
 
-        self.routes[path] = dict(
+        self.routes_map[path] = dict(
             handle=handle,
             runner=runner,
             runner_config_type=runner_config_type,
@@ -127,13 +127,16 @@ class Server:
         )
 
     async def websocket_handler(self, websocket: WebSocket):
+        path = websocket.scope.get("path")
+        if path is None:
+            raise RouteNotFound("Websocket recieved a request without a path declared.")
         async def handle_msg(recieved_message: ClientMessage) -> Union[ServerMessage, ErrorMessage]:
-            logging.info(f"Processing message(id={recieved_message.id}) for route {recieved_message.route_path}")
+            logging.info(f"Processing message(id={recieved_message.id}) for route {path}")
             try:
                 # TODO: Remove self.routes and route data
 
                 # build runner and run incoming input
-                route_data = self.routes[recieved_message.route_path]
+                route_data = self.routes_map[path]
                 handle = route_data.get("handle")
                 runner = route_data.get("runner")
                 streaming = route_data.get("streaming")
@@ -143,28 +146,17 @@ class Server:
                 output = await runner(handle, config, websocket=websocket, streaming=streaming).arun()
 
                 # return processed message
-                return ServerMessage(
-                    content=output,
-                    route_path=recieved_message.route_path
-                )
+                return ServerMessage(content=output)
             except ValueError as e:
-                err_content = f"ERROR: ValueError while processing Message(id={recieved_message.id}) on route path ({recieved_message.route_path})."
+                err_content = f"ERROR: ValueError while processing Message(id={recieved_message.id}) on route path ({path})."
                 logging.error(err_content)
                 traceback.print_exc()
-                return ErrorMessage(
-                    content=err_content,
-                    route_path=recieved_message.route_path,
-                    error=e
-                )
+                return ErrorMessage(content=err_content, error=e)
             except Exception as e:
-                err_content = f"ERROR: Unknown Error while processing Message(id={recieved_message.id}) on route path ({recieved_message.route_path})."
+                err_content = f"ERROR: Unknown Error while processing Message(id={recieved_message.id}) on route path ({path})."
                 logging.error(err_content)
                 traceback.print_exc()
-                return ErrorMessage(
-                    content=err_content,
-                    route_path=recieved_message.route_path,
-                    error=e
-                )
+                return ErrorMessage(content=err_content, error=e)
 
         async def send_msg(message: BaseMessage, broadcast: bool = False) -> None:
             logging.info(f"Sending message {message.to_json_dump()}")
@@ -180,19 +172,13 @@ class Server:
                 incoming_message = ClientMessage(**received_json)
                 logging.info(f"Received message: {incoming_message}")
 
-                route_path = incoming_message.route_path
-
-                if route_path is None:
-                    err_message = f"Recieved a message without a route. Message - {incoming_message}"
-                    logging.error(err_message)
-                    raise RouteNotFound(err_message)
                 
-                if route_path in self.routes:
-                    logging.info(f"Found handler for route {route_path}")
+                if path in self.routes_map:
+                    logging.info(f"Found handler for route {path}")
                     outgoing_message = await handle_msg(incoming_message)
                     await send_msg(outgoing_message)
                 else:
-                    err_message = f"Route ({route_path}) not defined on the server."
+                    err_message = f"Route ({path}) not defined on the server."
                     logging.error(err_message)
                     raise RouteNotFound(err_message)
             except WebSocketDisconnect as e:
@@ -245,7 +231,7 @@ class Server:
                             var input = document.getElementById("messageText")
                             var content = input.value
                             var config = { input: input.value }
-                            var value = { content: content, config: config,  route_path: "/agent" }
+                            var value = { content: content, config: config }
                             ws.send(JSON.stringify(value))
                             input.value = ''
                             event.preventDefault()

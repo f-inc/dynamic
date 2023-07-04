@@ -7,9 +7,8 @@ from dynamic.runners.runner import RunnerConfig
 
 class BaseMessage:
     """Message Inteface to be interpreted by websocket server"""
-    def __init__(self, content: str, route_path: Optional[str] = None):
+    def __init__(self, content: str):
         self.content = content
-        self.route_path = route_path
     
     def to_dict(self):
         return self.__dict__
