@@ -56,7 +56,7 @@ As of right now, the following features for an API built on dynamic are availabl
 
 ### Project Structure
 
-Typically your root directory should have a server/app script that initiates your run. And then if you opt for file-based routing, a folder named `routes` in which the endpoint logic is stored. More details on routing will be in the next section.
+Typically your root directory should have a server/app script that initiates your server. And then if you opt for file-based routing, a folder named `routes` in which the endpoint logic is stored. More details on routing will be in the next section.
 
 ```bash
 # example file structure tree
@@ -79,7 +79,167 @@ if __name__ == "__main__":
 
 Run with `python app.py`.
 
+Besides these details, the project structure has no other requirements or restrictions.
+
 ### Routing
+
+There are two routing options, file-based and inline routing. Dynamic does not restrict you from using one or the other or both.
+
+#### Inline routing (Agent and Chains)
+
+Simply put, these are routes that are manually defined into `start_server`.
+
+At the moment, this is the routing type that supports streaming agents. A streaming agent simply means output is streamed out a token at a time. The alternative is a non-streaming agent endpoint that only responds to requests after the agent completes its job.
+
+##### Non-streaming
+
+This is how you would declare a chain or non-streaming agent.
+
+```python
+from dynamic import start_server
+from dynamic.router import Router, Route
+
+from langchain.agents import AgentType
+from langchain.prompts import PromptTemplate
+from langchain.llms import OpenAI
+from langchain.chains import LLMChain
+
+"""
+Initizialize Chain and Agent as usual
+"""
+
+llm = OpenAI(
+    client=None,
+    temperature=0.9,
+)
+prompt = PromptTemplate(
+    input_variables=["product"],
+    template="What is a good name for a company that makes {product}?",
+)
+
+chain = LLMChain(llm=llm, prompt=prompt)
+
+tools = load_tools(["google-serper"], llm=llm)
+
+agent = initialize_agent(
+    tools=tools, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True,
+)
+
+if __name__ == "__main__":
+    routes = [
+        Routes(path="/chain", handle=chain, inline=True),
+        Routes(path="/agent", handle=agent, inline=True),
+    ]
+
+    router = Router(routes=routes)
+
+    start_server(router=router)
+
+```
+
+Now, the non-streaming chain and agent will respond to any HTTP method (`GET`, `PUT`, `POST`, `DELETE`), but it expects the prompt to be in the request body as such:
+
+```
+{
+    "config": {
+        "input": <prompt_here>
+    }
+}
+```
+
+So an example request would look like:
+
+```bash
+$ curl -X POST localhost:8000/chain \
+    -H 'Content-Type: application/json' \
+    -d '{"config": {"input": "AC/Heating"}}'
+```
+
+##### Streaming
+
+Setting up a streaming agent is nearly identical, except you must also:
+
+- declare `streaming=True` when defining your langchain llms and dynamic `Route`
+- declare your agent using `DynamicAgent` rather than `initialize_agent`
+
+(**Note**: Langchain yet has streaming support for chains, so for the time being)
+
+```python
+from dynamic.classes.agent import DynamicAgent
+
+llm = OpenAI(temperature=0, verbose=True, streaming=True) # declare llm with streaming
+
+tool_list = ["google-serper"]
+
+# if you want to use streaming over websocket, your agent must be decalared with a DynamicAgent
+streaming_agent = DynamicAgent(
+    tool_list=tool_list, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True,
+)
+
+if __name__ == "__main__":
+    routes = [
+        ...,
+        Route(path="/agent", handle=streaming_agent, streaming=True),
+    ]
+
+    router = Router(routes=routes)
+    start_server(router=router)
+```
+
+This now opens a websocket with path `/agent`: `ws://<host>/agent`
+
+To make a request, just like non-streaming agents, the handle will also expect your request to be sent in json representation that follows this template:
+
+```
+{
+    "config": {
+        "input": <agent_prompt_here>
+    }
+}
+```
+
+#### File-based routing
+
+This routing builds the routes based on the files given under the `routes` folder. Similar to frameworks like Next.js, the endpoint of the route is based on the file name.
+
+`./routes/foo/bar` &rarr; `/foo/bar`
+
+For callables, complete all of your API logic under a function named `handler`. Dynamic will support the `handler` by also passing in a request parameter. For example:
+
+```python
+# /examples/example_app/routes/foo/bar.py
+
+import typing
+
+from fastapi import Request
+
+async def handler(req: Request) -> typing.Any:
+    if req.method == "GET":
+        return get()
+    elif req.method == "POST" or req.method == "PUT":
+        return await put_or_post(req)
+    else:
+        return handle_all()
+
+
+def get() -> typing.Dict[str, str]:
+    return dict(message="foo")
+
+async def put_or_post(req: Request) -> typing.Dict[str, str]:
+    data = await req.json()
+
+    message = data.get("message")
+
+    if message:
+        return dict(message=message)
+
+    return dict(message="foo, called PUT/POST")
+
+def handle_all() -> typing.Dict[str, str]:
+    return dict(message="handle all")
+```
+
+See [`examples/example_app`](./../examples/example_app/) for more route examples.
 
 ### Callables
 
