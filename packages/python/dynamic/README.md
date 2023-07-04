@@ -85,6 +85,39 @@ Besides these details, the project structure has no other requirements or restri
 
 There are two routing options, file-based and inline routing. Dynamic does not restrict you from using one or the other or both.
 
+<!-- #### Inline routing (Static)
+
+
+Here is how you declare your static route.
+
+```python
+from dynamic.router import Router, Route
+
+...
+
+"""
+Callable Declaration
+"""
+def foo():
+    ...
+    return dict(message="/foo output")
+
+...
+
+"""
+Start Server
+"""
+if __name__ == "__main__":
+    routes = [
+        Route(path="/foo", handle=foo, inline=True),
+    ]
+
+    router = Router(routes=routes)
+
+    start_server(router=router)
+
+``` -->
+
 #### Inline routing (Agent and Chains)
 
 Simply put, these are routes that are manually defined into `start_server`.
