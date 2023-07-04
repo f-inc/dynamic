@@ -273,9 +273,3 @@ def handle_all() -> typing.Dict[str, str]:
 ```
 
 See [`examples/example_app`](./../examples/example_app/) for more route examples.
-
-### Callables
-
-### Langchain Chains
-
-### Langchain Agents
