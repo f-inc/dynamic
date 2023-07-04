@@ -107,13 +107,12 @@ class Server:
                 message="Ran inline route successfully!",
                 output=output
             )
-        
-        if route.inline:
-            logging.info(f"Adding inline route {route.path}")
-            self.app.add_api_route(path, run_inline_route, methods=["GET", "POST"])
-        elif route.streaming and isinstance(route.handle, DynamicAgent):
+        if route.streaming and isinstance(route.handle, DynamicAgent):
             logging.info(f"Adding websocket route {route.path}")
             self.app.websocket(route.path)(self.websocket_handler)
+        elif route.inline:
+            logging.info(f"Adding inline route {route.path}")
+            self.app.add_api_route(path, run_inline_route, methods=["GET", "POST"])
         else:
             logging.info(f"Adding route {route.path}")
             self.app.add_api_route(path, handle, methods=["GET", "PUT", "POST", "DELETE"])
