@@ -233,6 +233,8 @@ To make a request, just like non-streaming agents, the handle will also expect y
 
 #### File-based routing
 
+**Disclaimer**: Streaming agents are not yet supported in file-based routing as this approach to file-based routing may change.
+
 This routing builds the routes based on the files given under the `routes` folder. Similar to frameworks like Next.js, the endpoint of the route is based on the file name.
 
 `./routes/foo/bar` &rarr; `/foo/bar`
