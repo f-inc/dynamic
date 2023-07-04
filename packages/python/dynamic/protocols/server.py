@@ -140,7 +140,7 @@ class Server:
                 runner_config_type = route_data.get("runner_config_type")
                 config = runner_config_type(**recieved_message.config)
                 
-                output = await runner(handle, config, websocket=websocket, streaming=streaming).run()
+                output = await runner(handle, config, websocket=websocket, streaming=streaming).arun()
 
                 # return processed message
                 return ServerMessage(
