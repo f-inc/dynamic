@@ -27,7 +27,6 @@ parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Server:
     app = FastAPI(debug=True)
-    routes = {}
 
     def __init__(
             self,
@@ -82,15 +81,8 @@ class Server:
         """Dynamically add routes"""
         handle = route.handle
         path = route.path
-        runner, runner_config_type = get_runner(handle)
-
-        self.routes[path] = dict(
-            handle=handle,
-            runner=runner,
-            runner_config_type=runner_config_type,
-            inline=route.inline,
-            streaming=route.streaming,
-        )
+        runner = route.runner
+        runner_config_type = route.runner_config_type
 
         async def run_inline_route(req: Request):
             """Non-streaming simple route"""
@@ -127,44 +119,43 @@ class Server:
         )
 
     async def websocket_handler(self, websocket: WebSocket):
+        path = websocket.scope.get("path")
+        if path is None:
+            raise RouteNotFound("Websocket recieved a request without a path declared.")
         async def handle_msg(recieved_message: ClientMessage) -> Union[ServerMessage, ErrorMessage]:
-            logging.info(f"Processing message(id={recieved_message.id}) for route {recieved_message.route_path}")
+            logging.info(f"Processing message(id={recieved_message.id}) for route {path}")
             try:
                 # TODO: Remove self.routes and route data
 
                 # build runner and run incoming input
-                route_data = self.routes[recieved_message.route_path]
-                handle = route_data.get("handle")
-                runner = route_data.get("runner")
-                streaming = route_data.get("streaming")
-                runner_config_type = route_data.get("runner_config_type")
+                route = self.router.get_route(path)
+                if not route:
+                    err_message = f"Server's router does not have path, {path}"
+                    logging.error(err_message)
+                    raise RouteNotFound(err_message)
+                logging.info(f"Route path {path}")
+                logging.info(f"Route {route}")
+                
+                handle = route.handle
+                runner = route.runner
+                streaming = route.streaming
+                runner_config_type = route.runner_config_type
                 config = runner_config_type(**recieved_message.config)
                 
                 output = await runner(handle, config, websocket=websocket, streaming=streaming).arun()
 
                 # return processed message
-                return ServerMessage(
-                    content=output,
-                    route_path=recieved_message.route_path
-                )
+                return ServerMessage(content=output)
             except ValueError as e:
-                err_content = f"ERROR: ValueError while processing Message(id={recieved_message.id}) on route path ({recieved_message.route_path})."
+                err_content = f"ERROR: ValueError while processing Message(id={recieved_message.id}) on route path ({path})."
                 logging.error(err_content)
                 traceback.print_exc()
-                return ErrorMessage(
-                    content=err_content,
-                    route_path=recieved_message.route_path,
-                    error=e
-                )
+                return ErrorMessage(content=err_content, error=e)
             except Exception as e:
-                err_content = f"ERROR: Unknown Error while processing Message(id={recieved_message.id}) on route path ({recieved_message.route_path})."
+                err_content = f"ERROR: Unknown Error while processing Message(id={recieved_message.id}) on route path ({path})."
                 logging.error(err_content)
                 traceback.print_exc()
-                return ErrorMessage(
-                    content=err_content,
-                    route_path=recieved_message.route_path,
-                    error=e
-                )
+                return ErrorMessage(content=err_content, error=e)
 
         async def send_msg(message: BaseMessage, broadcast: bool = False) -> None:
             logging.info(f"Sending message {message.to_json_dump()}")
@@ -178,23 +169,13 @@ class Server:
             try:
                 received_json = await websocket.receive_json()
                 incoming_message = ClientMessage(**received_json)
-                logging.info(f"Received message: {incoming_message}")
+                logging.info(f"Received message: {incoming_message.to_json_dump()}")
 
-                route_path = incoming_message.route_path
+                outgoing_message = await handle_msg(incoming_message)
 
-                if route_path is None:
-                    err_message = f"Recieved a message without a route. Message - {incoming_message}"
-                    logging.error(err_message)
-                    raise RouteNotFound(err_message)
-                
-                if route_path in self.routes:
-                    logging.info(f"Found handler for route {route_path}")
-                    outgoing_message = await handle_msg(incoming_message)
-                    await send_msg(outgoing_message)
-                else:
-                    err_message = f"Route ({route_path}) not defined on the server."
-                    logging.error(err_message)
-                    raise RouteNotFound(err_message)
+                logging.info(f"Outgoing message: {outgoing_message.to_json_dump()}")
+                await send_msg(outgoing_message)
+
             except WebSocketDisconnect as e:
                 logging.info("WebSocketDisconnect")
                 await self.connection_manager.disconnect(websocket_id)
@@ -245,7 +226,7 @@ class Server:
                             var input = document.getElementById("messageText")
                             var content = input.value
                             var config = { input: input.value }
-                            var value = { content: content, config: config,  route_path: "/agent" }
+                            var value = { content: content, config: config }
                             ws.send(JSON.stringify(value))
                             input.value = ''
                             event.preventDefault()
