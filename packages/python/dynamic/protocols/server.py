@@ -136,11 +136,18 @@ class Server:
                 # TODO: Remove self.routes and route data
 
                 # build runner and run incoming input
-                route_data = self.routes_map[path]
-                handle = route_data.get("handle")
-                runner = route_data.get("runner")
-                streaming = route_data.get("streaming")
-                runner_config_type = route_data.get("runner_config_type")
+                route = self.router.get_route(path)
+                if not route:
+                    err_message = f"Server's router does not have path, {path}"
+                    logging.error(err_message)
+                    raise RouteNotFound(err_message)
+                logging.info(f"Route path {path}")
+                logging.info(f"Route {route}")
+                
+                handle = route.handle
+                runner = route.runner
+                streaming = route.streaming
+                runner_config_type = route.runner_config_type
                 config = runner_config_type(**recieved_message.config)
                 
                 output = await runner(handle, config, websocket=websocket, streaming=streaming).arun()
@@ -170,17 +177,13 @@ class Server:
             try:
                 received_json = await websocket.receive_json()
                 incoming_message = ClientMessage(**received_json)
-                logging.info(f"Received message: {incoming_message}")
+                logging.info(f"Received message: {incoming_message.to_json_dump()}")
 
-                
-                if path in self.routes_map:
-                    logging.info(f"Found handler for route {path}")
-                    outgoing_message = await handle_msg(incoming_message)
-                    await send_msg(outgoing_message)
-                else:
-                    err_message = f"Route ({path}) not defined on the server."
-                    logging.error(err_message)
-                    raise RouteNotFound(err_message)
+                outgoing_message = await handle_msg(incoming_message)
+
+                logging.info(f"Outgoing message: {outgoing_message.to_json_dump()}")
+                await send_msg(outgoing_message)
+
             except WebSocketDisconnect as e:
                 logging.info("WebSocketDisconnect")
                 await self.connection_manager.disconnect(websocket_id)
