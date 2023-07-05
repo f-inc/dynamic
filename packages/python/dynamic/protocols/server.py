@@ -27,7 +27,6 @@ parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Server:
     app = FastAPI(debug=True)
-    routes_map = {}
 
     def __init__(
             self,
@@ -82,15 +81,8 @@ class Server:
         """Dynamically add routes"""
         handle = route.handle
         path = route.path
-        runner, runner_config_type = get_runner(handle)
-
-        self.routes_map[path] = dict(
-            handle=handle,
-            runner=runner,
-            runner_config_type=runner_config_type,
-            inline=route.inline,
-            streaming=route.streaming,
-        )
+        runner = route.runner
+        runner_config_type = route.runner_config_type
 
         async def run_inline_route(req: Request):
             """Non-streaming simple route"""
