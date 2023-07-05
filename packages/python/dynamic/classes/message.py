@@ -7,8 +7,11 @@ from dynamic.runners.runner import RunnerConfig
 
 class BaseMessage:
     """Message Inteface to be interpreted by websocket server"""
-    def __init__(self, content: str):
+    def __init__(self, content: str, id: Optional[str] = None,):
         self.content = content
+        self.id = id
+        if self.id is None:
+            self.id = str(uuid4())
     
     def to_dict(self):
         return self.__dict__
@@ -18,11 +21,8 @@ class BaseMessage:
 
 class ClientMessage(BaseMessage):
     """Client-side websocket message"""
-    def __init__(self, config: RunnerConfig, id: Optional[str] = None, *args, **kwargs):
+    def __init__(self, config: RunnerConfig,  *args, **kwargs):
         self.config = config
-        self.id = id
-        if self.id is None:
-            self.id = str(uuid4())
         return super(ClientMessage, self).__init__(*args, **kwargs)
 
 class ServerMessage(BaseMessage):
