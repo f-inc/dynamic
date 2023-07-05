@@ -7,7 +7,7 @@ from dynamic.runners.runner import RunnerConfig
 
 class BaseMessage:
     """Message Inteface to be interpreted by websocket server"""
-    def __init__(self, content: str, id: Optional[str] = None,):
+    def __init__(self, content: str, id: Optional[str] = None):
         self.content = content
         self.id = id
         if self.id is None:
@@ -21,7 +21,7 @@ class BaseMessage:
 
 class ClientMessage(BaseMessage):
     """Client-side websocket message"""
-    def __init__(self, config: RunnerConfig,  *args, **kwargs):
+    def __init__(self, config: RunnerConfig, *args, **kwargs):
         self.config = config
         return super(ClientMessage, self).__init__(*args, **kwargs)
 
