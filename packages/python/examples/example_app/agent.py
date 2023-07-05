@@ -12,7 +12,7 @@ llm = OpenAI(temperature=0, streaming=True, verbose=True)
 
 tool_list = ["google-serper"]
 
-agent = initialize_agent(
+inline_agent = initialize_agent(
     tools=load_tools(tool_list), llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True,
 )
 
