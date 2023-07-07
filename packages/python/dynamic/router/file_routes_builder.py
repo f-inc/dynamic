@@ -1,10 +1,10 @@
+from dataclasses import dataclass
 import importlib.util
 import os
 import inspect
 import sys
 import logging
 
-from dynamic import dynamic
 from dynamic.router import Route
 
 MODULE_EXTENSIONS = '.py'
@@ -19,17 +19,26 @@ class FileRoutesBuilder:
     def get_file_routes(self):
         packages = [_get_package_contents(package) for package in self._get_list_of_routes()]
         handlers = {
-            _get_route_name(package.__file__): _get_valid_module_functions(package)
+            _get_route_name(package.__file__): _get_valid_module_handlers(package)
             for package in packages
         }
         routes = []
 
-        for path, handle in handlers.items():
-            if handle:
-                route = Route(path=path, handle=handle, streaming=False)
-                routes.append(route)
+        for path, handlers in handlers.items():
+            methods = set()
+            for handle in handlers:
+                if handle.streaming:
+                    if "ws" in methods:
+                        raise Exception(f"Each route can only have ONE streaming/websocket endpoints. {path} has declared multiple.")
+                    methods.add("ws")
+                    route = Route(path=path, handle=handle, streaming=True, methods=[])
+                else:
+                    if any(m in methods for m in handle.methods):
+                        raise Exception(f"Cannot repeat usage of HTTP methods in the same path (\"{path}\").")
+                    route = Route(path=path, handle=handle, streaming=False, methods=handle.methods)
+                    routes.append(route)
 
-        logging.info(f"Grabbing {len(routes)} file-based routes...")
+        logging.info(f"Grabbed {len(routes)} file-based routes...")
 
         return routes
 
@@ -53,20 +62,19 @@ class FileRoutesBuilder:
 # Helper Functions #
 ####################
 
-def _get_valid_module_functions(package):
+def _get_valid_module_handlers(package):
+    handlers = []
     module_members = inspect.getmembers(package, inspect.isfunction)
     
     for name, func in module_members:
         if hasattr(func, "__wrapped__"):
-            logging.info(f"{name} - {func} is wrapped {func.methods}")
-            # logging.info(dynamic == func.__wrapped__.__name__)
-        if name == DEFAULT_HANDLER_NAME:
-            return func
-    
-    file_path = package.__file__.split(DEFAULT_ROUTES_DIRECTORY)[1]
-    logging.warn(f"The module at {file_path} does not have a handler function. Expected a function named '{DEFAULT_HANDLER_NAME}', did not find.")
+            handlers.append(func)
 
-    return None
+    if len(handlers) == 0:
+        file_path = package.__file__.split(DEFAULT_ROUTES_DIRECTORY)[1]
+        logging.warn(f"The module at {file_path} does not have any valid handlers.")
+
+    return handlers
 
 def _get_package_contents(file_path):
     """Import functions and other modules within a file"""
