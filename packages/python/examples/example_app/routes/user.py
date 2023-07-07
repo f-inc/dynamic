@@ -1,5 +1,8 @@
 from fastapi import Request
 
+from dynamic import dynamic
+
+@dynamic
 def handler(req: Request):
     if req.method == "GET":
         return get_user()
