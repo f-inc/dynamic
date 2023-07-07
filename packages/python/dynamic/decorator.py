@@ -2,8 +2,7 @@ from functools import wraps
 from typing import Callable, List, Optional
 
 from dynamic.classes.agent import DynamicAgent
-
-METHODS = ["GET", "PUT", "POST", "DELETE"]
+from dynamic.protocols.server import SUPPORTED_METHODS
 
 def dynamic(
         func: Optional[Callable] = None,
@@ -13,8 +12,8 @@ def dynamic(
     """Dynamic wrapper to declare endpoints"""
 
     for m in methods:
-        if m not in methods:
-            raise Exception(f"{m} is not a valid method. Supported methods: {METHODS}")
+        if m not in SUPPORTED_METHODS:
+            raise Exception(f"{m} is not a valid method. Supported methods: {SUPPORTED_METHODS}")
 
     def decorator(func):
 
