@@ -28,12 +28,14 @@ class Route:
             self,
             path: str,
             handle: Callable,
+            methods: List[str] = ["GET"],
             inline: bool = False,
             streaming: bool = False,
             route_type: Optional[RouteType] = None,
     ):
         self.path = path
         self.handle = handle
+        self.methods = methods
         self.inline = inline
         self.streaming = streaming
         self.route_type = route_type
