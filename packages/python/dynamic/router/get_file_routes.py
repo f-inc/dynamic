@@ -4,11 +4,14 @@ import inspect
 import sys
 import logging
 
+from dynamic import dynamic
 from dynamic.router import Route
 
 MODULE_EXTENSIONS = '.py'
 DEFAULT_ROUTES_DIRECTORY = "/routes"
 DEFAULT_HANDLER_NAME = "handler"
+
+# TODO: Make this a class
 
 def get_file_routes():
     packages = [_get_package_contents(package) for package in _get_list_of_routes()]
@@ -40,6 +43,9 @@ def _get_valid_module_functions(package):
     module_members = inspect.getmembers(package, inspect.isfunction)
     
     for name, func in module_members:
+        if hasattr(func, "__wrapped__"):
+            logging.info(f"{name} - {func} is wrapped {func.methods}")
+            # logging.info(dynamic == func.__wrapped__.__name__)
         if name == DEFAULT_HANDLER_NAME:
             return func
     
