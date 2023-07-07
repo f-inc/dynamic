@@ -3,6 +3,9 @@ import logging
 
 from fastapi import Request
 
+from dynamic import dynamic
+
+@dynamic(methods=["GET", "PUT", "POST"])
 async def handler(req: Request) -> typing.Any:
     if req.method == "GET":
         return get()
