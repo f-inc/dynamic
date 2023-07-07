@@ -11,29 +11,43 @@ MODULE_EXTENSIONS = '.py'
 DEFAULT_ROUTES_DIRECTORY = "/routes"
 DEFAULT_HANDLER_NAME = "handler"
 
-# TODO: Make this a class
+class FileRoutesBuilder:
+    def __init__(self, routes_dir: str = DEFAULT_ROUTES_DIRECTORY):
+        self.routes = []
+        self._dir_path = self._get_route_dir_path(routes_dir)
 
-def get_file_routes():
-    packages = [_get_package_contents(package) for package in _get_list_of_routes()]
-    handlers = {
-        _get_route_name(package.__file__): _get_valid_module_functions(package)
-        for package in packages
-    }
-    routes = []
+    def get_file_routes(self):
+        packages = [_get_package_contents(package) for package in self._get_list_of_routes()]
+        handlers = {
+            _get_route_name(package.__file__): _get_valid_module_functions(package)
+            for package in packages
+        }
+        routes = []
 
-    for path, handle in handlers.items():
-        if handle:
-            route = Route(path=path, handle=handle, streaming=False)
-            routes.append(route)
+        for path, handle in handlers.items():
+            if handle:
+                route = Route(path=path, handle=handle, streaming=False)
+                routes.append(route)
 
-    logging.info(f"Grabbing {len(routes)} file-based routes...")
+        logging.info(f"Grabbing {len(routes)} file-based routes...")
 
-    return routes
+        return routes
 
-def has_file_based_routing():
-    route_dir_path = _get_route_dir_path()
+    def has_file_based_routing(self):
+        return os.path.exists(self._dir_path)
 
-    return os.path.exists(route_dir_path)
+    def _get_route_dir_path(self, routes_dir):
+        path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        path = os.path.normpath(path + routes_dir)
+
+        return path
+    
+    def _get_list_of_routes(self):
+        _, files = _run_fast_scandir(self._dir_path)
+
+        files = [f for f in files if "__" not in f]
+
+        return files
 
 ####################
 # Helper Functions #
