@@ -5,8 +5,13 @@ def dynamic(streaming=False):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-    
+            output = func(*args, **kwargs)
+
+            if streaming:
+                if not isinstance(output, DynamicAgent):
+                    raise Exception("Streaming endpoints must return DynamicAgents")
+
+            return output
         return wrapper
     return decorator
 
