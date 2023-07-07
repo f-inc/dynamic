@@ -15,7 +15,8 @@ setup_logging()
 
 
 def start_server(
-        router: Router = Router(routes=[]),
+        router: Router = Router(),
+        # TODO: Remove routes in start_server
         routes: Optional[List[Any]] = None,
         static_dir=None,
         test_ws=False
