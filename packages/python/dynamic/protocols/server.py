@@ -109,7 +109,7 @@ class Server:
             self.app.add_api_route(path, run_inline_route, methods=["GET", "POST"])
         else:
             logging.info(f"Adding route {route.path}")
-            self.app.add_api_route(path, handle, methods=["GET", "PUT", "POST", "DELETE"])
+            self.app.add_api_route(path, handle, methods=route.methods)
 
     def start(self):
         logging.info(f"Starting server on host:port {self.host}:{self.port}")
