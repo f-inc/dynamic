@@ -22,18 +22,21 @@ class FileRoutesBuilder:
             _get_route_name(package.__file__): _get_valid_module_handlers(package)
             for package in packages
         }
+
         routes = []
 
         for path, handlers in handlers.items():
-            methods = set()
+            existing_methods = set()
             for handle in handlers:
-                if handle.streaming:
-                    if "ws" in methods:
+                if handle.streaming:                    
+                    if "ws" in existing_methods:
                         raise Exception(f"Each route can only have ONE streaming/websocket endpoints. {path} has declared multiple.")
-                    methods.add("ws")
-                    route = Route(path=path, handle=handle, streaming=True, methods=[])
+                    existing_methods.add("ws")
+                    dynamic_handle = handle()
+                    route = Route(path=path, handle=dynamic_handle, streaming=True, methods=[])
+                    routes.append(route)
                 else:
-                    if any(m in methods for m in handle.methods):
+                    if any(m in existing_methods for m in handle.methods):
                         raise Exception(f"Cannot repeat usage of HTTP methods in the same path (\"{path}\").")
                     route = Route(path=path, handle=handle, streaming=False, methods=handle.methods)
                     routes.append(route)
