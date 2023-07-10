@@ -180,7 +180,7 @@ class Server:
 
             except WebSocketDisconnect as e:
                 logging.info("WebSocketDisconnect")
-                await self.connection_manager.disconnect(websocket_id)
+                self.connection_manager.disconnect(websocket_id)
                 break
             # TODO: Update error messaging
             except orjson.JSONDecodeError as e:
@@ -193,6 +193,10 @@ class Server:
                 await send_msg(ErrorMessage(error=e, content=err_content))
             except RouteNotFound as e:
                 err_content = f"ERROR: failed to handle recieve_json. {e.__class__.__name__} Recieved."
+                logging.error(err_content)
+                await send_msg(ErrorMessage(error=e, content=err_content))
+            except TypeError as e:
+                err_content = f"ERROR - {e.__class__.__name__}: the recieved client message was formatted in correctly. \n Recieved: {received_json}"
                 logging.error(err_content)
                 await send_msg(ErrorMessage(error=e, content=err_content))
             except Exception as e:
