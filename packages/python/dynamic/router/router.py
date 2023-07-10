@@ -60,7 +60,7 @@ class Router:
     
     def get_route(self, path: str, method: str = "GET") -> Union[Route, None]:
         for route in self.routes:
-            if route.path == path and method in route.methods:
+            if route.path == path and (method in route.methods or route.streaming):
                 return route
         
         return None
