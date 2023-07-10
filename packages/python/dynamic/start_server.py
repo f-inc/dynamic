@@ -24,7 +24,6 @@ def start_server(
     
     router = _handle_router(router, routes)
 
-    logging.info(f"Starting server on {host}:{port}")
     server = Server(router, host=host, port=port, static_dir=static_dir)
     if test_ws:
         server._add_test_ws_html()
