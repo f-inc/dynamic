@@ -106,7 +106,7 @@ class Server:
             self.app.websocket(route.path)(self.websocket_handler)
         elif route.inline:
             logging.info(f"Adding inline route {route.path}")
-            self.app.add_api_route(path, run_inline_route, methods=["GET", "POST"])
+            self.app.add_api_route(path, run_inline_route, methods=route.methods)
         else:
             logging.info(f"Adding route path={route.path}, methods={route.methods}")
             self.app.add_api_route(path, handle, methods=route.methods)
