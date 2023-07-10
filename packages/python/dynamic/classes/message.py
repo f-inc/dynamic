@@ -33,7 +33,7 @@ class ServerMessage(BaseMessage):
 class ErrorMessage(BaseMessage):
     """Base Error Message from websocket server"""
     def __init__(self, error: Exception, *args, **kwargs):
-        self.error = error
-        self.trace_back = error.__traceback__
+        self.error = str(error)
+        self.error_type = error.__class__.__name__
 
         return super(ErrorMessage, self).__init__(*args, **kwargs)

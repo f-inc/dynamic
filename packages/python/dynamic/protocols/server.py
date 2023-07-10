@@ -193,6 +193,10 @@ class Server:
                 err_content = f"ERROR: failed to handle recieve_json. {e.__class__.__name__} Recieved."
                 logging.error(err_content)
                 await send_msg(ErrorMessage(error=e, content=err_content))
+            except TypeError as e:
+                err_content = f"ERROR - {e.__class__.__name__}: the recieved client message was formatted in correctly. \n Recieved: {received_json}"
+                logging.error(err_content)
+                await send_msg(ErrorMessage(error=e, content=err_content))
             except Exception as e:
                 err_content = f"ERROR: Unknown failure to handle recieve_json. {e.__class__.__name__} Recieved."
                 logging.error(err_content)
