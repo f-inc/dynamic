@@ -178,7 +178,7 @@ class Server:
 
             except WebSocketDisconnect as e:
                 logging.info("WebSocketDisconnect")
-                await self.connection_manager.disconnect(websocket_id)
+                self.connection_manager.disconnect(websocket_id)
                 break
             # TODO: Update error messaging
             except orjson.JSONDecodeError as e:

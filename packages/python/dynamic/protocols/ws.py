@@ -23,7 +23,7 @@ class ConnectionManager:
         return id
 
     def disconnect(self, id: str) -> None:
-        logging.info(f"Removing Websocket with id({id})...")
+        logging.info(f"Removing Websocket with id({id}).")
         del self.active_connections[id]
 
     async def send_message(self, websocket: WebSocket, message: BaseMessage) -> None:
