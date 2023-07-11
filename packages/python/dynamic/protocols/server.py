@@ -17,7 +17,7 @@ from dynamic.classes.agent import DynamicAgent
 from dynamic.classes.message import BaseMessage, ErrorMessage, ClientMessage, ServerMessage
 from dynamic.router import Router, Route
 from dynamic.runners.utils import get_runner
-from dynamic.protocols.ws import ConnectionManager
+from dynamic.protocols.ws import ConnectionManager, WebSocketAckTimeoutError
 
 # Exceptions
 class RouteNotFound(Exception):
@@ -164,7 +164,12 @@ class Server:
             else:
                 await self.connection_manager.send_message(websocket, message)
 
-        websocket_id = await self.connection_manager.connect(websocket)
+        
+        try:
+            websocket_id = await self.connection_manager.connect(websocket)
+        except WebSocketAckTimeoutError as e:
+            raise e
+
         while True:
             try:
                 received_json = await websocket.receive_json()
