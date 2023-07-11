@@ -11,10 +11,6 @@ def dynamic(
     ):
     """Dynamic wrapper to declare endpoints"""
 
-    for m in methods:
-        if m not in SUPPORTED_METHODS:
-            raise Exception(f"{m} is not a valid method. Supported methods: {SUPPORTED_METHODS}")
-
     def decorator(func):
 
         @wraps(func)

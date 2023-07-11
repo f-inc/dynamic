@@ -23,8 +23,6 @@ from dynamic.protocols.ws import ConnectionManager
 class RouteNotFound(Exception):
     pass
 
-SUPPORTED_METHODS = ["GET", "PUT", "POST", "DELETE"]
-
 parent_dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Server:
