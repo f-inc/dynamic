@@ -1,8 +1,8 @@
+import logging
 from functools import wraps
 from typing import Callable, List, Optional
 
 from dynamic.classes.agent import DynamicAgent
-from dynamic.protocols.server import SUPPORTED_METHODS
 
 def dynamic(
         func: Optional[Callable] = None,
@@ -11,21 +11,27 @@ def dynamic(
     ):
     """Dynamic wrapper to declare endpoints"""
 
-    for m in methods:
-        if m not in SUPPORTED_METHODS:
-            raise Exception(f"{m} is not a valid method. Supported methods: {SUPPORTED_METHODS}")
-
     def decorator(func):
 
+        wrapper = None
+
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            output = func(*args, **kwargs)
-
-            if streaming:
-                if not isinstance(output, DynamicAgent):
-                    raise Exception(f"Streaming endpoints must return DynamicAgents. {func.__name__} returns {type(func)}.")
-
-            return output
+        async def http_wrapper(*args, **kwargs):
+            return await func(*args, **kwargs)
+        
+        @wraps(func)
+        def dynamic_wrapper(*args, **kwargs):
+            dynamic_handler = func(*args, **kwargs)
+            if not isinstance(dynamic_handler, DynamicAgent):
+                # If any other Dynamic handlers are added, for instance DynamicChat, make sure to type check here
+                raise Exception(f"Streaming endpoints must return DynamicAgents. {func.__name__} returns {type(func)}.")
+            
+            return dynamic_handler
+        
+        if streaming:
+            wrapper = dynamic_wrapper
+        else:
+            wrapper = http_wrapper
         
         # set dynamic options
         wrapper.streaming = streaming
