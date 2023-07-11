@@ -1,3 +1,4 @@
+import logging
 from functools import wraps
 from typing import Callable, List, Optional
 
@@ -12,15 +13,25 @@ def dynamic(
 
     def decorator(func):
 
+        wrapper = None
+
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            output = func(*args, **kwargs)
-
-            if streaming:
-                if not isinstance(output, DynamicAgent):
-                    raise Exception(f"Streaming endpoints must return DynamicAgents. {func.__name__} returns {type(func)}.")
-
-            return output
+        async def http_wrapper(*args, **kwargs):
+            return await func(*args, **kwargs)
+        
+        @wraps(func)
+        def dynamic_wrapper(*args, **kwargs):
+            dynamic_handler = func(*args, **kwargs)
+            if not isinstance(dynamic_handler, DynamicAgent):
+                # If any other Dynamic handlers are added, for instance DynamicChat, make sure to type check here
+                raise Exception(f"Streaming endpoints must return DynamicAgents. {func.__name__} returns {type(func)}.")
+            
+            return dynamic_handler
+        
+        if streaming:
+            wrapper = dynamic_wrapper
+        else:
+            wrapper = http_wrapper
         
         # set dynamic options
         wrapper.streaming = streaming
