@@ -8,6 +8,9 @@ authors = [
 ]
 readme = "README.md"
 keywords = ["llm", "langchain"]
+packages = [
+    {include="dynamic"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
