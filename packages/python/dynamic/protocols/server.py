@@ -173,7 +173,6 @@ class Server:
 
                 outgoing_message = await handle_msg(incoming_message)
 
-                logging.info(f"Outgoing message: {outgoing_message.to_json_dump()}")
                 await send_msg(outgoing_message)
 
             except WebSocketDisconnect as e:
