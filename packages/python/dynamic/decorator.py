@@ -2,7 +2,6 @@ from functools import wraps
 from typing import Callable, List, Optional
 
 from dynamic.classes.agent import DynamicAgent
-from dynamic.protocols.server import SUPPORTED_METHODS
 
 def dynamic(
         func: Optional[Callable] = None,
