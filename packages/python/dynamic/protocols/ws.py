@@ -26,7 +26,7 @@ class ConnectionManager:
         self.active_connections[id] = websocket
 
         try:
-            await asyncio.wait_for(websocket.receive(), timeout=10)
+            await asyncio.wait_for(websocket.receive(), timeout=DEFAULT_TIMEOUT)
         except Exception as e:
             err_msg = f"Client acknowledge message exceeded timeout of {DEFAULT_TIMEOUT}s. Please make sure your client is sending a acknowledge message before timeout occurs."
             logging.error(err_msg)
