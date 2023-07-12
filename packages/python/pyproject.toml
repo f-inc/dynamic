@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "dynamic-sh"
+version = "0.0.2"
+description = ""
+authors = [
+    "Furqan Rydhan <furqan.rydhan@gmail.com>",
+    "Aman Ibrahim <amanmibra@gmail.com>"
+]
+readme = "README.md"
+keywords = ["llm", "langchain"]
+packages = [
+    {include="dynamic"}
+]
+
+[tool.poetry.dependencies]
+# TODO: figure out minimum python version 
+python = "^3.10"
+fastapi = "^0.95.1"
+uvicorn = {version = "^0.21.1", extras= ["standard"]}
+orjson = "^3.8.10"
+langchain = "^0.0.147"
+openai = "^0.27.4"
+python-dotenv = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

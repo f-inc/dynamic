@@ -1,0 +1,6 @@
+fastapi==0.97.0
+langchain==0.0.205
+orjson==3.9.1
+python-dotenv==1.0.0
+starlette==0.28.0
+uvicorn==0.22.0
