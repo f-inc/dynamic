@@ -1,8 +1,8 @@
 from dynamic import start_server
 from dynamic.router import Router, Route
 
-from example.agent import inline_agent, streaming_agent
-from example.chain import chain
+from agent import inline_agent, streaming_agent
+from chain import chain
 
 if __name__ == "__main__":
 
