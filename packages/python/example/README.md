@@ -119,12 +119,39 @@ This example is available to you on this example app via `localhost:8000/test_ws
 
 ## How does it work
 
-TODO
+<!-- TODO -->
 
 ### The agents in `agent.py`
 
-TODO
+See [agent.py](./agent.py) for context.
 
-### The setup in `app.py`
+In this example app, the agent is taking prompts and using the `google-serper` tool to answer the prompt via google.
 
-TODO
+As you can see in `agent.py`, there are two agents defined and exported, `inline_agent` and `streaming_agent`.
+
+All LLM operators, in this case langchain, can be defined as `inline` or `streaming` based on how the Dynamic API server serves its content.
+
+Inline operators are defined as they typically would be, in this case, Langchain Agents that are defined with `initialize_agent`.
+
+Streaming operators will be given a dynamic class wrapper, in this case, `DynamicAgent` that will take identical parameters as the inline operator, but will add the websocket configuration in the middle.
+
+### The chain in `chain.py`
+
+See [chain.py](./chain.py) for context.
+
+Currently, there is no streaming support for Langchain `Chain`, so dynamic only has inline endpoints available for chains.
+
+In this example, it is serving a chain that will take in a prompt input into the template: `What is a good name for a company that makes {product}?`, `product` being the input from API request.
+
+```python
+llm = OpenAI(
+    client=None,
+    temperature=0.9,
+)
+prompt = PromptTemplate(
+    input_variables=["product"],
+    template="What is a good name for a company that makes {product}?",
+)
+
+chain = LLMChain(llm=llm, prompt=prompt)
+```

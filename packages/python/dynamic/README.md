@@ -101,50 +101,17 @@ Besides these details, the project structure has no other requirements or restri
 
 ### Routing
 
-There are two routing options, file-based and inline routing. Dynamic does not restrict you from using one or the other or both.
+There are two routing options, file-based and non file-based routing. Dynamic does not restrict you from using one or the other or both.
 
-<!-- #### Inline routing (Static)
-
-
-Here is how you declare your static route.
-
-```python
-from dynamic.router import Router, Route
-
-...
-
-"""
-Callable Declaration
-"""
-def foo():
-    ...
-    return dict(message="/foo output")
-
-...
-
-"""
-Start Server
-"""
-if __name__ == "__main__":
-    routes = [
-        Route(path="/foo", handle=foo, inline=True),
-    ]
-
-    router = Router(routes=routes)
-
-    start_server(router=router)
-
-``` -->
-
-#### Inline routing (Agent and Chains)
+#### Non file-based routing
 
 Simply put, these are routes that are manually defined into `start_server`.
 
 At the moment, this is the routing type that supports streaming agents. A streaming agent simply means output is streamed out a token at a time. The alternative is a non-streaming agent endpoint that only responds to requests after the agent completes its job.
 
-##### Non-streaming
+##### Non-streaming/inline
 
-This is how you would declare a chain or non-streaming agent.
+This is how you would declare a chain or non-streaming, or inline, agent.
 
 ```python
 from dynamic import start_server
