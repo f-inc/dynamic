@@ -43,17 +43,22 @@ Using a websocket client, you can communicate with this endpoint, also retrievin
 
 - `/agent`
 
-### Calling the different methods
+### CRUD and inline
 
 All non-streaming endpoints are accessible via HTTP requests, using `curl` or any other API tool to communicate with the API server.
 
 ```bash
-# examples
-
 # GET /foo/bar
 $ curl localhost:8000/foo/bar
 
 > {"message":"foo"}
+
+# POST /foo/bar
+$ curl -X POST localhost:8000/foo/bar \
+-H 'Content-Type: application/json' \
+-d '{"message": "foo-ey"}'
+
+> {"message":"foo-ey"}
 
 # POST /chain
 $ curl -X POST localhost:8000/chain \
@@ -72,7 +77,45 @@ $ curl -X POST localhost:8000/inline_agent \
 
 ### Streaming
 
-TODO
+`DyanmicAgent` uses a technology called [websockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) to stream the generated LLM tokens to a client at the moment of generation. In order to take advantage of this, use a [websocket client](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications) to connect to the `/agent` dynamic endpoint.
+
+Here is an example of a client setup to send and retrieve data to `/agent`:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chat</title>
+  </head>
+  <body>
+    <h1>WebSocket Testing</h1>
+    <form action="" onsubmit="sendMessage(event)">
+      <input type="text" id="messageText" autocomplete="off" />
+      <button>Send</button>
+    </form>
+    <p id="messages"></p>
+    <script>
+      var ws = new WebSocket("ws://localhost:8000/agent");
+      ws.onmessage = function (event) {
+        var messages = document.getElementById("messages");
+        data = JSON.parse(event.data);
+        var content = document.createTextNode(data.content);
+        messages.appendChild(content);
+      };
+      function sendMessage(event) {
+        var input = document.getElementById("messageText");
+        var content = input.value;
+        var value = { config: { input: input.value } };
+        ws.send(JSON.stringify(value));
+        input.value = "";
+        event.preventDefault();
+      }
+    </script>
+  </body>
+</html>
+```
+
+This example is available to you on this example app via `localhost:8000/test_ws`. Open on a browser to access this.
 
 ## How does it work
 
