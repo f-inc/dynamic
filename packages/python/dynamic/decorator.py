@@ -1,6 +1,7 @@
 import logging
 from functools import wraps
 from typing import Callable, List, Optional
+from inspect import iscoroutinefunction
 
 from dynamic.classes.agent import DynamicAgent
 
@@ -17,8 +18,10 @@ def dynamic(
 
         @wraps(func)
         async def http_wrapper(*args, **kwargs):
-            return await func(*args, **kwargs)
-        
+            if _is_async(func):
+                return await func(*args, **kwargs)
+            return func(*args, **kwargs)
+
         @wraps(func)
         def dynamic_wrapper(*args, **kwargs):
             dynamic_handler = func(*args, **kwargs)
@@ -44,3 +47,5 @@ def dynamic(
 
     return decorator
 
+def _is_async(func: Callable) -> bool:
+    return iscoroutinefunction(func)
