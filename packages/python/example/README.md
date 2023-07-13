@@ -38,10 +38,13 @@ Using HTTP `POST` requests, you can communicate to these Langchain LLM operators
 - `/chain`
 - `/inline_agent`
 
-**Streaming Agent**
+**Streaming Agents**
 Using a websocket client, you can communicate with this endpoint, also retrieving live tokens from this agent as it is responding to your prompt. This is the same agent from `/inline_agent`, but now the content, including the agent self-reflection/explanation, is being outputted as it is generated.
 
 - `/agent`
+- `/file_based_agent`
+
+**Note:** Both endpoints are the exact agent, one is non file-based route and the other one is.
 
 ### CRUD and inline
 
