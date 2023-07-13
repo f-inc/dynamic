@@ -33,7 +33,7 @@ They handle any `GET`, `PUT`, `POST`, or `DELETE` request.
 - `/user`
 
 **Non-streaming, or inline, Langchain Objects**
-Using HTTP requests, you can communicate to these Langchain LLM operators, `inline` is in reference to non-streaming LLM operators.
+Using HTTP `POST` requests, you can communicate to these Langchain LLM operators, `inline` is in reference to non-streaming LLM operators.
 
 - `/chain`
 - `/inline_agent`
@@ -46,6 +46,18 @@ Using a websocket client, you can communicate with this endpoint, also retrievin
 ### CRUD and inline
 
 All non-streaming endpoints are accessible via HTTP requests, using `curl` or any other API tool to communicate with the API server.
+
+**Remember**: As mentioned in the [dynamic README.md](./../dynamic/README.md), inline LLM operators need this template used for their API request to handle prompts:
+
+```
+{
+    "config": {
+        "input": <prompt_here>
+    }
+}
+```
+
+**Examples**
 
 ```bash
 # GET /foo/bar
