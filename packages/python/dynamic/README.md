@@ -11,7 +11,6 @@ Easy-to-use framework to enable building, deploying, and scaling LLM application
 1. [Getting Started](#getting-started)
 
    a. [Installation](#installation)
-   <!-- b. [Concepts](#concepts) -->
 
 2. [Building Your Application](#building-your-application)
 
@@ -31,8 +30,20 @@ Easy-to-use framework to enable building, deploying, and scaling LLM application
 
 ### Installation
 
-**Note:** There are instructions for the alpha version, these are expected to update once the wheel is released into a public artifactory.
+With python versions 3.6+, run the following to install the `dynamic` module. It is recommended that you have a virtual environment set up in your project as well before doing this.
 
+```bash
+pip install dynamic-sh
+```
+
+**(optional)** Test that the module is functional in your console by running:
+
+```bash
+$ python -c "import dynamic"
+```
+
+<!--
+These are useful instructions for a developer README.
 1. Start a virtual environment
 2. Given a python wheel provided by Aman, run:
 
@@ -47,8 +58,7 @@ $ pip install dist/dynamic-0.0.1-py3-none-any.whl
 ```bash
 $ python -c "import dynamic"
 ```
-
-<!-- ### Concepts -->
+-->
 
 ## Building Your Application
 
