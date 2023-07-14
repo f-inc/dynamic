@@ -27,3 +27,7 @@ async def put_or_post(req: Request) -> typing.Any:
 
 def handle_all() -> typing.Dict[str, str]:
     return dict(message="handle all")
+
+@dynamic(methods=["DELETE"])
+def delete():
+    return dict(message="Ran delete()")
