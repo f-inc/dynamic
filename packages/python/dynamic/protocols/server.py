@@ -84,6 +84,9 @@ class Server:
         runner = route.runner
         runner_config_type = route.runner_config_type
 
+        if route.streaming and route.inline:
+            raise Exception(f"Routes cannot have both streaming=True and inline=True. Offending route: {route.path}, {route.methods}")
+
         async def run_inline_route(req: Request):
             """Non-streaming simple route"""
             # collect data
