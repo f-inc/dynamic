@@ -105,23 +105,66 @@ Besides these details, the project structure has no other requirements or restri
 
 There are two routing options, file-based and non file-based routing. Dynamic does not restrict you from using one or the other or both.
 
+#### File-based routing
+
+This is the **recommended** method of routing.
+
+This routing builds the routes based on the files given under the `routes` folder. Similar to frameworks like [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/api-routes), the endpoint of the route is based on the file name.
+
+`./routes/foo/bar` &rarr; `/foo/bar`
+
+##### Decorator `@dynamic`
+
+Use the decorator in your files to declare which functions will act as your route handlers.
+
+| Parameter | Type      | Default | Description                                                                                                                                                             |
+| --------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| streaming | bool      | False   | Useful for websocket endpoints for LLM Operators (\`DynamicAgent\`). <br /> Handlers with `streaming=True` must return an instance of the LLM Operator in their output. |
+| methods   | List[str] | ["GET"] | List all of the HTTP methods that the handler will support.                                                                                                             |
+
+```python
+# /example/routes/foo/bar.py
+from fastapi import Request
+
+from dynamic import dynamic
+
+@dynamic
+def get(req: Request) -> typing.Any:
+    if req.method == "GET":
+        return dict(message="foo")
+    else:
+        logging.warn("If you see this message, dynamic decorator method handling is not working correctly")
+        return handle_all()
+
+
+@dynamic(methods=["PUT", "POST"])
+async def put_or_post(req: Request) -> typing.Any:
+    data = await req.json()
+
+    message = data.get("message")
+
+    if message:
+        return dict(message=message)
+
+    return dict(message="foo, called PUT/POST")
+
+def handle_all() -> typing.Dict[str, str]:
+    return dict(message="handle all")
+
+@dynamic(methods=["DELETE"])
+def delete():
+    return dict(message="Ran delete()")
+```
+
+See [the example app](./example/) for more route examples.
+
 #### Non file-based routing
 
 Simply put, these are routes that are manually defined into `start_server`.
 
-At the moment, this is the routing type that supports streaming agents. A streaming agent simply means output is streamed out a token at a time. The alternative is a non-streaming agent endpoint that only responds to requests after the agent completes its job.
-
-<<<<<<< HEAD
-
 ##### Non-streaming/inline
 
-# This is how you would declare a chain or non-streaming, or inline, agent.
-
-##### Non-streaming
-
-This is how you would declare a chain or non-streaming agent.
-
-> > > > > > > c1/websocket/auth
+This is how you would declare a chain or non-streaming, or inline, agent.
 
 ```python
 from dynamic import start_server
@@ -225,48 +268,3 @@ To make a request, just like non-streaming agents, the handle will also expect y
     }
 }
 ```
-
-#### File-based routing
-
-**Disclaimer**: Streaming agents are not yet supported in file-based routing as this approach to file-based routing may change.
-
-This routing builds the routes based on the files given under the `routes` folder. Similar to frameworks like Next.js, the endpoint of the route is based on the file name.
-
-`./routes/foo/bar` &rarr; `/foo/bar`
-
-For callables, complete all of your API logic under a function named `handler`. Dynamic will support the `handler` by also passing in a request parameter. For example:
-
-```python
-# /examples/example_app/routes/foo/bar.py
-
-import typing
-
-from fastapi import Request
-
-async def handler(req: Request) -> typing.Any:
-    if req.method == "GET":
-        return get()
-    elif req.method == "POST" or req.method == "PUT":
-        return await put_or_post(req)
-    else:
-        return handle_all()
-
-
-def get() -> typing.Dict[str, str]:
-    return dict(message="foo")
-
-async def put_or_post(req: Request) -> typing.Dict[str, str]:
-    data = await req.json()
-
-    message = data.get("message")
-
-    if message:
-        return dict(message=message)
-
-    return dict(message="foo, called PUT/POST")
-
-def handle_all() -> typing.Dict[str, str]:
-    return dict(message="handle all")
-```
-
-See [`examples/example_app`](./../examples/example_app/) for more route examples.
