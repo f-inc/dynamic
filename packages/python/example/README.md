@@ -24,13 +24,13 @@ This is a simple example dynamic app using file-based routing. At the moment, fi
 
 ## How to use the example
 
-There are a total of 5 different routes on this app:
+There are a total of 6 different routes on this app:
 
 **CRUD Examples**
-They handle any `GET`, `PUT`, `POST`, or `DELETE` request.
+Simple CRUD (Create, Read, Update, Delete) endpoints.
 
-- `/foo/bar`
-- `/user`
+- `GET, PUT, POST, or DELETE /foo/bar`
+- `GET, PUT, or POST /user`
 
 **Non-streaming, or inline, Langchain Objects**
 Using HTTP `POST` requests, you can communicate to these Langchain LLM operators, `inline` is in reference to non-streaming LLM operators.
