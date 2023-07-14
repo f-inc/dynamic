@@ -18,6 +18,7 @@ class DynamicAgent:
         self.kwargs = kwargs
 
     def _initialize_agent_with_websocket(self, websocket: WebSocket):
+        # TODO: Minimize the number of agent inits
         logging.info("Setting up streaming settings for agent...")
         llm = self.llm
 

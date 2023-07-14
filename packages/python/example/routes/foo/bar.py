@@ -3,19 +3,19 @@ import logging
 
 from fastapi import Request
 
-async def handler(req: Request) -> typing.Any:
+from dynamic import dynamic
+
+@dynamic(methods=["GET"])
+def get(req: Request) -> typing.Any:
     if req.method == "GET":
-        return get()
-    elif req.method == "POST" or req.method == "PUT":
-        return await put_or_post(req)
+        return dict(message="foo")
     else:
+        logging.warn("If you see this message, dynamic decorator method handling is not working correctly")
         return handle_all()
 
 
-def get() -> typing.Dict[str, str]:
-    return dict(message="foo")
-
-async def put_or_post(req: Request) -> typing.Dict[str, str]:
+@dynamic(methods=["PUT", "POST"])
+async def put_or_post(req: Request) -> typing.Any:
     data = await req.json()
 
     message = data.get("message")
@@ -27,3 +27,7 @@ async def put_or_post(req: Request) -> typing.Dict[str, str]:
 
 def handle_all() -> typing.Dict[str, str]:
     return dict(message="handle all")
+
+@dynamic(methods=["DELETE"])
+def delete():
+    return dict(message="Ran delete()")

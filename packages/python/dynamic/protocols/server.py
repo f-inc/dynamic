@@ -84,6 +84,9 @@ class Server:
         runner = route.runner
         runner_config_type = route.runner_config_type
 
+        if route.streaming and route.inline:
+            raise Exception(f"Routes cannot have both streaming=True and inline=True. Offending route: {route.path}, {route.methods}")
+
         async def run_inline_route(req: Request):
             """Non-streaming simple route"""
             # collect data
@@ -103,11 +106,11 @@ class Server:
             logging.info(f"Adding websocket route {route.path}")
             self.app.websocket(route.path)(self.websocket_handler)
         elif route.inline:
-            logging.info(f"Adding inline route {route.path}")
-            self.app.add_api_route(path, run_inline_route, methods=["GET", "POST"])
+            logging.info(f"Adding inline route {route.path}, methods={route.methods}")
+            self.app.add_api_route(path, run_inline_route, methods=route.methods)
         else:
-            logging.info(f"Adding route {route.path}")
-            self.app.add_api_route(path, handle, methods=["GET", "PUT", "POST", "DELETE"])
+            logging.info(f"Adding route path={route.path}, methods={route.methods}")
+            self.app.add_api_route(path, handle, methods=route.methods)
 
     def start(self):
         logging.info(f"Starting server on host:port {self.host}:{self.port}")
@@ -173,7 +176,6 @@ class Server:
 
                 outgoing_message = await handle_msg(incoming_message)
 
-                logging.info(f"Outgoing message: {outgoing_message.to_json_dump()}")
                 await send_msg(outgoing_message)
 
             except WebSocketDisconnect as e:

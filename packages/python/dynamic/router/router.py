@@ -28,12 +28,14 @@ class Route:
             self,
             path: str,
             handle: Callable,
+            methods: List[str] = ["GET"],
             inline: bool = False,
             streaming: bool = False,
             route_type: Optional[RouteType] = None,
     ):
         self.path = path
         self.handle = handle
+        self.methods = methods
         self.inline = inline
         self.streaming = streaming
         self.route_type = route_type
@@ -50,23 +52,25 @@ class Route:
 
 class Router:
     def __init__(self, routes: List[Route] = []):
-        self.routes = []
+        self.routes: List[Route] = []
 
         # error checks routes, duplicate paths are problematic atm
         for route in routes:
             self.add_route(route)
     
-    def get_route(self, path: str) -> Union[Route, None]:
+    def get_route(self, path: str, method: str = "GET") -> Union[Route, None]:
         for route in self.routes:
-            if route.path == path:
+            if route.path == path and (method in route.methods or route.streaming):
                 return route
         
         return None
     
     def add_route(self, route: Route):
-        paths = [r.path for r in self.routes]
-        if route.path in paths:
-            raise Exception(f"Duplicate path found, \"{route.path}\". All routes must have unique path (both http and websocket).")
+        for r in self.routes:
+            overlapping_methods = set(r.methods).intersection(set(route.methods))
+            # the route path is the same and if one the methods already has an existing handler, then raise exception
+            if r.path == route.path and len(overlapping_methods) > 0:
+                raise Exception(f"Duplicate path (\"{route.path}\") + method(s) found, {overlapping_methods}. All incoming routes must have unique path (both http and websocket) and methods.")
 
         self.routes.append(route)
 
