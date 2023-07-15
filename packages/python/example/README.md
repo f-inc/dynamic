@@ -24,13 +24,13 @@ This is a simple example dynamic app using file-based routing. At the moment, fi
 
 ## How to use the example
 
-There are a total of 5 different routes on this app:
+There are a total of 6 different routes on this app:
 
 **CRUD Examples**
-They handle any `GET`, `PUT`, `POST`, or `DELETE` request.
+Simple CRUD (Create, Read, Update, Delete) endpoints.
 
-- `/foo/bar`
-- `/user`
+- `GET, PUT, POST, or DELETE /foo/bar`
+- `GET, PUT, or POST /user`
 
 **Non-streaming, or inline, Langchain Objects**
 Using HTTP `POST` requests, you can communicate to these Langchain LLM operators, `inline` is in reference to non-streaming LLM operators.
@@ -38,10 +38,13 @@ Using HTTP `POST` requests, you can communicate to these Langchain LLM operators
 - `/chain`
 - `/inline_agent`
 
-**Streaming Agent**
+**Streaming Agents**
 Using a websocket client, you can communicate with this endpoint, also retrieving live tokens from this agent as it is responding to your prompt. This is the same agent from `/inline_agent`, but now the content, including the agent self-reflection/explanation, is being outputted as it is generated.
 
 - `/agent`
+- `/file_based_agent`
+
+**Note:** Both endpoints are the exact agent, one is non file-based route and the other one is.
 
 ### CRUD and inline
 
