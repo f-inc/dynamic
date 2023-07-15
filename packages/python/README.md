@@ -1,6 +1,6 @@
 # Dynamic ⚡️
 
-![Static Badge](https://img.shields.io/badge/release-0.0.4--alpha-purple)
+![Static Badge](https://img.shields.io/badge/release-0.0.4--alpha-blue)
 
 **Disclaimer:** This documentation is intended for the alpha F.inc Community launch. Some portions of this documentation, such as the setup, are expected to change. Please keep that in mind for future reference.
 
