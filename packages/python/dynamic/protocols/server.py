@@ -231,6 +231,10 @@ class Server:
                             var content = document.createTextNode(data.content)
                             messages.appendChild(content)
                         };
+                        ws.onopen = function(event) {
+                            console.log("Sending acknowledge message...")
+                            ws.send("ack msg")
+                        }
                         function sendMessage(event) {
                             var input = document.getElementById("messageText")
                             var content = input.value
