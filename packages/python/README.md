@@ -155,7 +155,18 @@ def handle_all() -> typing.Dict[str, str]:
 def delete():
     return dict(message="Ran delete()")
 ```
+```python
+# /example/routes/file_based_agent.py
 
+streaming_agent = DynamicAgent(
+    tool_list=tool_list, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True,
+)
+
+# this agent will be sitting on the websocket "ws://<host>:<port>/file_based_agent"
+@dynamic(streaming=True)
+def agent():
+    return streaming_agent
+```
 See [the example app](./example/) for more route examples.
 
 #### Non file-based routing
@@ -233,7 +244,7 @@ Setting up a streaming agent is nearly identical, except you must also:
 - declare `streaming=True` when defining your langchain llms and dynamic `Route`
 - declare your agent using `DynamicAgent` rather than `initialize_agent`
 
-(**Note**: Langchain yet has streaming support for chains, so for the time being)
+(**Note**: Langchain yet has streaming support for chains, so for the time being only `Agents` are supported)
 
 ```python
 from dynamic.classes.agent import DynamicAgent
