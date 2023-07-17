@@ -128,7 +128,6 @@ class Server:
         async def handle_msg(recieved_message: ClientMessage) -> Union[ServerMessage, ErrorMessage]:
             logging.info(f"Processing message(id={recieved_message.id}) for route {path}")
             try:
-                # TODO: Remove self.routes and route data
 
                 # build runner and run incoming input
                 route = self.router.get_route(path)
@@ -145,12 +144,13 @@ class Server:
                 runner_config_type = route.runner_config_type
                 config = runner_config_type(**recieved_message.config)
                 
+                # TODO: Add a seperate try/catch for runner arun
                 output = await runner(handle, config, websocket=websocket, streaming=streaming).arun()
 
                 # return processed message
                 return ServerMessage(content=output)
             except ValueError as e:
-                err_content = f"ERROR: ValueError while processing Message(id={recieved_message.id}) on route path ({path})."
+                err_content = f"ERROR: ValueError while processing {recieved_message.__class__.__name__}(id={recieved_message.id}) on route path ({path}). Message values: {recieved_message.to_dict()}"
                 logging.error(err_content)
                 traceback.print_exc()
                 return ErrorMessage(content=err_content, error=e)
