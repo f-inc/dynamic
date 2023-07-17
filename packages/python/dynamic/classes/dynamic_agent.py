@@ -39,10 +39,12 @@ class DynamicAgent:
 
         tool_list = self.kwargs.get("tool_list")
         if tool_list:
-            self.kwargs["tools"] = load_tools(tool_list, llm=llm)
+            tools = self.kwargs.get("tools", [])
+            tools += load_tools(tool_list, llm=llm)
+            self.kwargs["tools"] = tools
 
         logging.info("Initializing agent...")
-        return initialize_agent(llm=llm, **self.kwargs)
+        return initialize_agent(llm=llm, agent=self.agent, **self.kwargs)
 
 class DynamicParser(ConvoOutputParser):
     def parse(self, text: str):
