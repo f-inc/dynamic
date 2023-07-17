@@ -27,6 +27,7 @@ class ConnectionManager:
         self.active_connections[id] = websocket
 
         if self.wait_for_ack:
+            # TODO: Make wait_for_ack the default
             try:
                 await asyncio.wait_for(websocket.receive(), timeout=DEFAULT_TIMEOUT)
             except Exception as e:
