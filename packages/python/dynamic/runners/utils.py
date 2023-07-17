@@ -3,7 +3,7 @@ from typing import Any, Tuple
 from dynamic.runners.runner import Runner, RunnerConfig
 from dynamic.runners.callable import CallableRunner, CallableRunnerConfig
 from dynamic.runners.langchain import AgentRunner, ChainRunner, ChainRunnerConfig
-from dynamic.classes.agent import DynamicAgent
+from dynamic.classes.dynamic_agent  import DynamicAgent
 
 from langchain.agents import Agent, AgentExecutor
 from langchain.chains.base import Chain

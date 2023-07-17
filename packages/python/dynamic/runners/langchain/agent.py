@@ -6,7 +6,7 @@ from fastapi import WebSocket
 
 # dyanmic
 from dynamic.runners.runner import Runner
-from dynamic.classes.agent import DynamicAgent
+from dynamic.classes.dynamic_agent  import DynamicAgent
 from dynamic.runners.langchain.config import ChainRunnerConfig
 
 # langchain

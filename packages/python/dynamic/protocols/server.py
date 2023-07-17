@@ -13,7 +13,7 @@ from starlette.responses import FileResponse
 import uvicorn
 
 # dynamic
-from dynamic.classes.agent import DynamicAgent
+from dynamic.classes.dynamic_agent  import DynamicAgent
 from dynamic.classes.message import BaseMessage, ErrorMessage, ClientMessage, ServerMessage
 from dynamic.router import Router, Route
 from dynamic.runners.utils import get_runner

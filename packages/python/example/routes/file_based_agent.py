@@ -6,7 +6,7 @@ from langchain.agents import AgentType, initialize_agent, load_tools
 from langchain.llms import OpenAI
 
 from dynamic import dynamic
-from dynamic.classes.agent import DynamicAgent
+from dynamic.classes.dynamic_agent  import DynamicAgent
 
 
 llm = OpenAI(temperature=0, streaming=True, verbose=True)

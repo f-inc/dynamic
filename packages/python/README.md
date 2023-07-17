@@ -236,7 +236,7 @@ Setting up a streaming agent is nearly identical, except you must also:
 (**Note**: Langchain yet has streaming support for chains, so for the time being)
 
 ```python
-from dynamic.classes.agent import DynamicAgent
+from dynamic.classes.dynamic_agent  import DynamicAgent
 
 llm = OpenAI(temperature=0, verbose=True, streaming=True) # declare llm with streaming
 
