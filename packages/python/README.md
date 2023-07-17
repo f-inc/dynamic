@@ -10,27 +10,27 @@ Easy-to-use framework to enable building, deploying, and scaling LLM application
 
 ## Table of Contents
 
-1. [Getting Started](#getting-started)
+1. [Getting Started](#1-getting-started)
 
-   a. [Installation](#installation)
+   a. [Installation](#a-installation)
 
-2. [Building Your Application](#building-your-application)
+2. [Building Your Application](#2-building-your-application)
 
-   a. [Dynamic Alpha - what can you do?](#dynamic-alpha---what-can-you-do)
+   a. [Dynamic Alpha - what can you do?](#a-dynamic-alpha---what-can-you-do)
 
-   b. [Project Structure](#project-structure)
+   b. [Project Structure](#b-project-structure)
 
-   c. [Routing](#routing)
+   c. [Routing](#c-routing)
 
-   d. [Callables](#callables)
+   d. [Websockets](#d-websockets)
 
-   e. [Langchain Agents](#langchain-agents)
+3. [Concepts](#3-concepts)
 
-   f. [Langchain Chains](#langchain-chains)
+   a. [LLM Operators](#a-llm-operators)
 
-## Getting Started
+## 1. Getting Started
 
-### Installation
+### a. Installation
 
 With python versions 3.6+, run the following to install the `dynamic` module. It is recommended that you have a virtual environment set up in your project as well before doing this.
 
@@ -62,9 +62,9 @@ $ python -c "import dynamic"
 ```
 -->
 
-## Building Your Application
+## 2. Building Your Application
 
-### Dynamic Alpha - what can you do?
+### a. Dynamic Alpha - what can you do?
 
 As of right now, the following features for an API built on dynamic are available:
 
@@ -74,7 +74,7 @@ As of right now, the following features for an API built on dynamic are availabl
 
 3. Given an agent, a websocket endpoint can be generated that will stream all of the agent's output in real-time.
 
-### Project Structure
+### b. Project Structure
 
 Typically your root directory should have a server/app script that initiates your server. And then if you opt for file-based routing, a folder named `routes` in which the endpoint logic is stored. More details on routing will be in the next section.
 
@@ -101,7 +101,7 @@ Run with `python app.py`.
 
 Besides these details, the project structure has no other requirements or restrictions.
 
-### Routing
+### c. Routing
 
 There are two routing options, file-based and non file-based routing. Dynamic does not restrict you from using one or the other or both.
 
@@ -268,3 +268,35 @@ To make a request, just like non-streaming agents, the handle will also expect y
     }
 }
 ```
+
+#### d. Websockets
+
+##### Security
+
+Most of the server-side websocket setup is done automatically for you with Dynamic ⚡️ (yay 🎉). The rest, that is client-side, depends on the websocket library/client you use to connect to your Dynamic Websocket. Please be **aware** there is one expectation from Dynamic.
+
+Dynamic expects there to be an acknowledge message sent from the client within 10 seconds of connecting. At the moment, there is no expected format, but as a layer of acknowledged connection and security, there is this expectation, otherwise, your connection will be closed.
+
+Here is a simple example:
+
+```javascript
+var ws = new WebSocket("ws://localhost:8000/agent");
+
+ws.onopen = function(event) {
+    console.log("Sending acknowledge message on connection open...")
+    ws.send("ack msg")
+}
+ws.onmessage = function(event) {
+    ...
+};
+```
+
+## 3. Concepts
+
+### a. LLM Operators
+
+TODO
+
+#### Inline vs Streaming
+
+TODO
