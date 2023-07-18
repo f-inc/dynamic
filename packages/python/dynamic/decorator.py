@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Callable, List, Optional
 from inspect import iscoroutinefunction
 
-from dynamic.classes.agent import DynamicAgent
+from dynamic.classes.dynamic_agent  import DynamicAgent
 
 def dynamic(
         func: Optional[Callable] = None,
