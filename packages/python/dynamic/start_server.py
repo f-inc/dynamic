@@ -19,14 +19,11 @@ def start_server(
         # TODO: Remove routes in start_server
         routes: Optional[List[Any]] = None,
         static_dir=None,
-        test_ws=False
     ):
     
     router = _handle_router(router, routes)
 
     server = Server(router, host=host, port=port, static_dir=static_dir)
-    if test_ws:
-        server._add_test_ws_html()
     server.start()
 
     return server

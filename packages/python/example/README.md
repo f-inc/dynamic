@@ -130,7 +130,7 @@ Here is an example of a client setup to send and retrieve data to `/agent`:
 </html>
 ```
 
-This example is available to you on this example app via `localhost:8000/test_ws`. Open on a browser to access this.
+WebSocket testing is available to you on this example app via `localhost:8000/`. Open a browser to access this.
 
 ## How does it work
 

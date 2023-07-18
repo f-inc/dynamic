@@ -12,4 +12,4 @@ if __name__ == "__main__":
         Route(path="/chain", handle=chain, inline=True),
     ]
 
-    start_server(router=Router(routes=langchain_routes), test_ws=True)
+    start_server(router=Router(routes=langchain_routes))
