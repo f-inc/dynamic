@@ -15,6 +15,11 @@ from langchain.agents.conversational_chat.output_parser import ConvoOutputParser
 # dynamic
 from dynamic.classes.message import ServerMessage
 
+CHAT_AGENTS = [
+    AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+    AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+]
 
 class DynamicAgent:
     def __init__(self, llm, agent, **kwargs):
@@ -32,7 +37,7 @@ class DynamicAgent:
         llm.callbacks = [WebsocketCallbackHandler(websocket)]
 
         # chat agent
-        if self.agent == AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION:
+        if self.agent in CHAT_AGENTS:
             agent_kwargs = self.kwargs.get("agent_kwargs", {})
             agent_kwargs["output_parser"] = DynamicParser()
             self.kwargs["agent_kwargs"] = agent_kwargs
