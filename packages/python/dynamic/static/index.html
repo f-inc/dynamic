@@ -3,7 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamic Franework - Getting Started</title>
+    <title>Dynamic Framework Demo</title>
+
+    <h1>Dynamic Demo</h1>
+    <h3>Websocket connected to: "/agent"</h3>
+    <small><b>Disclaimer:</b> The demo is accepting all raw output from the websocket. Only client-side formatting is supported at the moment.</small>
+    <br />
+    <br />
+    <form action="" onsubmit="sendMessage(event)">
+        <input type="text" id="messageText" autocomplete="off"/>
+        <button>Send</button>
+    </form>
+    <p id='messages'>
+    </p>
 
     <!-- Importing React, ReactDOM and Babel -->
     <script

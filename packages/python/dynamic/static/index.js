@@ -5,18 +5,10 @@
  */
 
 // main.js
-const socket = new WebSocket(`ws://${window.location.host}/ws`);
+const socket = new WebSocket(`ws://${window.location.host}/agent`);
 
 socket.addEventListener("open", (event) => {
   console.log("WebSocket opened:", event);
-
-  /*  setTimeout(() => {*/
-  /*sendMessage({ route: "chain", data: { product: "cookies" } });*/
-  /*}, 2000);*/
-
-  setTimeout(() => {
-    sendMessage({ route: "agent", data: { product: "ties" } });
-  }, 1000);
 });
 
 socket.addEventListener("connected", (event) => {
@@ -25,8 +17,10 @@ socket.addEventListener("connected", (event) => {
 
 socket.addEventListener("message", (event) => {
   console.log("WebSocket message received:", event);
-  const receivedHTML = event.data;
-  document.querySelector("#root").innerHTML = receivedHTML;
+  var messages = document.getElementById("messages");
+  data = JSON.parse(event.data);
+  var content = document.createTextNode(data.content);
+  messages.appendChild(content);
 });
 
 socket.addEventListener("close", (event) => {
@@ -37,11 +31,13 @@ socket.addEventListener("error", (event) => {
   console.log("WebSocket error:", event);
 });
 
-function sendMessage(json) {
-  if (socket.readyState === WebSocket.OPEN) {
-    //TODO validate it has "route"
-    socket.send(JSON.stringify(json));
-  } else {
-    console.error("WebSocket not connected");
-  }
+function sendMessage(event) {
+  console.log();
+  var input = document.getElementById("messageText");
+  var content = input.value;
+  var config = { input: input.value };
+  var value = { content: content, config: config };
+  socket.send(JSON.stringify(value));
+  input.value = "";
+  event.preventDefault();
 }
