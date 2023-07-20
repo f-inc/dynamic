@@ -2,10 +2,10 @@
   "name": "dynamic.js",
   "version": "1.0.0",
   "description": "LLM API server framework",
-  "main": "dynamic.ts",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon dynamic.ts"
+    "start": "nodemon example.ts"
   },
   "keywords": [],
   "author": "",
