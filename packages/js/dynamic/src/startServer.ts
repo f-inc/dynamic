@@ -1,6 +1,11 @@
 import dynamic from "./dynamic";
 
 const startServer = (): void => {
+    dynamic.get("/", {websocket: false}, (request, reply) => {
+        reply.send("Hello World!")
+    })
+
+
     // Run the server!
     dynamic.listen({ port: 9801 }, function (err, address) {
         if (err) {
