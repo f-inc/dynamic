@@ -1,5 +1,8 @@
 import dynamic from "./dynamic";
 
+const host: string = process.env.HOST || "0.0.0.0"
+const port: number = parseInt(process.env.PORT || '8000')
+
 const startServer = (): void => {
     dynamic.get("/", {websocket: false}, (request, reply) => {
         reply.send("Hello World!")
@@ -7,12 +10,12 @@ const startServer = (): void => {
 
 
     // Run the server!
-    dynamic.listen({ port: 9801 }, function (err, address) {
+    dynamic.listen({ host: host, port: port }, function (err, address) {
         if (err) {
-        dynamic.log.error(err);
-        process.exit(1);
+            dynamic.log.error(err);
+            process.exit(1);
         }
-        // Server is now listening on ${address}
+        console.log(`Server is now listening on ${address}`)
     });
 }
 
