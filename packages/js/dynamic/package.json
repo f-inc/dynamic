@@ -1,11 +1,11 @@
 {
-  "name": "js",
+  "name": "dynamic.js",
   "version": "1.0.0",
-  "description": "",
-  "main": "dynamic.ts",
+  "description": "LLM API server framework",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon dynamic.ts"
+    "start": "nodemon example.ts"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +26,7 @@
   "dependencies": {
     "@fastify/websocket": "^8.0.0",
     "fastify": "^4.17.0",
-    "fastify-websocket": "^4.3.0"
+    "fastify-websocket": "^4.3.0",
+    "langchain": "^0.0.113"
   }
 }
