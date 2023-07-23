@@ -1,4 +1,4 @@
-import startServer, { Plugins, Server } from "../dynamic/src/startServer";
+import startServer, { Plugins, Server } from "../../dynamic/src/startServer";
 
 // route plugins
 import home, { HomeOpts } from "./routes";
