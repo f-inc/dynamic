@@ -25,8 +25,8 @@ const startServer = (server: Server): void => {
 
   if (plugins != null) {
     // adding plugins - includes routes
-    plugins.forEach(({ callback }) => {
-      dynamic.register(callback)
+    plugins.forEach(({ callback, options }) => {
+      dynamic.register(callback, options)
     })
   }
 

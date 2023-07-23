@@ -1,14 +1,14 @@
 import startServer, { Plugins, Server } from "../dynamic/src/startServer";
 
 // route plugins
-import route from "./routes";
+import home, { HomeOpts } from "./routes";
 
-const routes: Plugins[] = [
-    {callback: route}
-]
+const homeOptions: HomeOpts = { foo: "bar" };
+
+const routes: Plugins[] = [{ callback: home, options: homeOptions }];
 
 const server: Server = {
-    plugins: routes
-}
+  plugins: routes,
+};
 
-startServer(server)
+startServer(server);
