@@ -1,39 +1,45 @@
 // fastify
-import { FastifyPluginCallback, FastifyPluginAsync } from "fastify";
-
+import { type FastifyPluginCallback, type FastifyPluginAsync } from 'fastify'
 
 // dynamic
-import dynamic from "./dynamic";
+import dynamic from './dynamic'
 
-const host: string = process.env.HOST || "0.0.0.0"
-const port: number = parseInt(process.env.PORT || '8000')
+const DEFAULT_HOST: string = process.env.HOST ?? '0.0.0.0'
+const DEFAULT_PORT: number = parseInt(process.env.PORT ?? '8000')
 
 interface Plugins {
-    callback: FastifyPluginCallback | FastifyPluginAsync,
-    options?: any
+  callback: FastifyPluginCallback | FastifyPluginAsync
+  options?: any
 }
 
-const startServer = (plugins?: Plugins[]): void => {
-    dynamic.get("/", {websocket: false}, (request, reply) => {
-        reply.send("Hello World!")
+interface Server {
+  plugins: Plugins[]
+  host?: string
+  port?: number
+}
+
+const startServer = (server: Server): void => {
+  const { plugins } = server
+  const host = server.host ?? DEFAULT_HOST
+  const port = server.port ?? DEFAULT_PORT
+
+  if (plugins != null) {
+    // adding plugins - includes routes
+    plugins.forEach(({ callback, options }) => {
+      dynamic.register(callback, options)
     })
-    
-    if (plugins) {
+  }
 
-        // adding plugins - includes routes
-        plugins.forEach(({ callback, options }) => {
-            dynamic.register(callback, options)
-        })
+  // Run the server!
+  dynamic.listen({ host, port }, function (err, address) {
+    if (err != null) {
+      dynamic.log.error(err)
+      process.exit(1)
     }
-
-    // Run the server!
-    dynamic.listen({ host: host, port: port }, function (err, address) {
-        if (err) {
-            dynamic.log.error(err);
-            process.exit(1);
-        }
-        console.log(`Server is now listening on ${address}`)
-    });
+    console.log(`Server is now listening on ${address}`)
+  })
 }
 
-export default startServer;
+export default startServer
+
+export type { Plugins, Server }

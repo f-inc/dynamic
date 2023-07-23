@@ -1,10 +1,10 @@
-import Fastify, { FastifyInstance } from "fastify";
-import FastifyWebsocket from "@fastify/websocket";
+import Fastify, { type FastifyInstance } from 'fastify'
+import FastifyWebsocket from '@fastify/websocket'
 
 const dynamic: FastifyInstance = Fastify({
-  logger: true,
-});
+  logger: true
+})
 
-dynamic.register(FastifyWebsocket);
+dynamic.register(FastifyWebsocket)
 
-export default dynamic;
+export default dynamic
