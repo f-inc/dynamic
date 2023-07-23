@@ -12,7 +12,5 @@
         └── api
 ```
 
-- `dynamic`: npm package source code
-- `examples`: example projects using `dynamic` package
-
-  - `api`
+- [`dynamic`](./dynamic/README.md): npm package source code
+- [`examples`](./examples/README.md): example projects using `dynamic` package
