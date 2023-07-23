@@ -13,16 +13,18 @@ interface Plugins {
     options?: any
 }
 
-const startServer = (plugins?: Plugins[]): void => {
-    dynamic.get("/", {websocket: false}, (request, reply) => {
-        reply.send("Hello World!")
-    })
-    
+interface Server {
+    plugins: Plugins[]
+}
+
+const startServer = (server: Server): void => {
+    const { plugins } = server
+        
     if (plugins) {
 
         // adding plugins - includes routes
-        plugins.forEach(({ callback, options }) => {
-            dynamic.register(callback, options)
+        plugins.forEach(({ callback }) => {
+            dynamic.register(callback)
         })
     }
 
@@ -37,3 +39,8 @@ const startServer = (plugins?: Plugins[]): void => {
 }
 
 export default startServer;
+
+export {
+    Plugins,
+    Server
+}
