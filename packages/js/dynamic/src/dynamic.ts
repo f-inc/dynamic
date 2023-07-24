@@ -1,10 +1,22 @@
-import Fastify, { type FastifyInstance } from 'fastify'
-import FastifyWebsocket from '@fastify/websocket'
+// fastify
+import Fastify, { type FastifyInstance } from "fastify";
+import FastifyWebsocket from "@fastify/websocket";
 
-const dynamic: FastifyInstance = Fastify({
-  logger: true
-})
+// default plugins
+import { fileRoutes } from "fastify-file-routes";
 
-dynamic.register(FastifyWebsocket)
+type DynamicOptions = {
+  fileBased?: boolean;
+};
 
-export default dynamic
+const dynamic = (options?: DynamicOptions) => {
+  const app: FastifyInstance = Fastify({
+    logger: true,
+  });
+
+  app.register(FastifyWebsocket);
+
+  return app;
+};
+
+export default dynamic;
