@@ -3,7 +3,7 @@ import Fastify, { type FastifyInstance } from "fastify";
 import FastifyWebsocket from "@fastify/websocket";
 
 // default plugins
-import { fileRoutes } from "fastify-file-routes";
+import autoRoute from "fastify-autoroutes";
 
 type DynamicOptions = {
   fileBased?: boolean;
@@ -15,6 +15,10 @@ const dynamic = (options?: DynamicOptions) => {
   });
 
   app.register(FastifyWebsocket);
+
+  app.register(autoRoute, {
+    dir: "./../routes",
+  });
 
   return app;
 };

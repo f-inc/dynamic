@@ -18,10 +18,15 @@ interface Server {
   port?: number;
 }
 
-const startServer = (server: Server): void => {
-  const { plugins } = server;
-  const host = server.host ?? DEFAULT_HOST;
-  const port = server.port ?? DEFAULT_PORT;
+const DEFAULT_SERVER: Server = {
+  plugins: [],
+  host: DEFAULT_HOST,
+  port: DEFAULT_PORT,
+};
+
+const startServer = (server?: Server): void => {
+  server = { ...DEFAULT_SERVER, ...server };
+  const { plugins, host, port } = server;
 
   const app = dynamic();
 
