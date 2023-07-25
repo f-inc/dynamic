@@ -18,22 +18,29 @@ interface Server {
   port?: number
 }
 
-const startServer = (server: Server): void => {
-  const { plugins } = server
-  const host = server.host ?? DEFAULT_HOST
-  const port = server.port ?? DEFAULT_PORT
+const DEFAULT_SERVER: Server = {
+  plugins: [],
+  host: DEFAULT_HOST,
+  port: DEFAULT_PORT
+}
+
+const startServer = (server?: Server): void => {
+  server = { ...DEFAULT_SERVER, ...server }
+  const { plugins, host, port } = server
+
+  const app = dynamic()
 
   if (plugins != null) {
     // adding plugins - includes routes
     plugins.forEach(({ callback, options }) => {
-      dynamic.register(callback, options)
+      app.register(callback, options)
     })
   }
 
   // Run the server!
-  dynamic.listen({ host, port }, function (err, address) {
+  app.listen({ host, port }, function (err, address) {
     if (err != null) {
-      dynamic.log.error(err)
+      app.log.error(err)
       process.exit(1)
     }
     console.log(`Server is now listening on ${address}`)

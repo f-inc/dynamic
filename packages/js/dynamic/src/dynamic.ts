@@ -1,10 +1,26 @@
+// fastify
 import Fastify, { type FastifyInstance } from 'fastify'
 import FastifyWebsocket from '@fastify/websocket'
 
-const dynamic: FastifyInstance = Fastify({
-  logger: true
-})
+// default plugins
+import autoRoute from 'fastify-autoroutes'
 
-dynamic.register(FastifyWebsocket)
+interface DynamicOptions {
+  fileBased?: boolean
+}
+
+const dynamic = (options?: DynamicOptions): FastifyInstance => {
+  const app: FastifyInstance = Fastify({
+    logger: true
+  })
+
+  app.register(FastifyWebsocket)
+
+  app.register(autoRoute, {
+    dir: './../routes'
+  })
+
+  return app
+}
 
 export default dynamic
