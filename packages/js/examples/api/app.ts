@@ -1,11 +1,20 @@
 import startServer, { Plugins, Server } from "../../dynamic/src/startServer";
 
-// route plugins
-// import home, { HomeOpts } from "./routes";
+/**
+ * Without Plugins
+ *
+ * With file-based routing, technically you app.ts you could simply have one line:
+ *
+ * startServer();
+ *
+ * For the sake of example, we added a non-filebased route.
+ */
 
-// const homeOptions: HomeOpts = { foo: "bar" };
+import home, { HomeOpts } from "./exampleRoute";
 
-const routes: Plugins[] = [];
+const homeOptions: HomeOpts = { foo: "bar", prefix: "/example" };
+
+const routes: Plugins[] = [{ callback: home, options: homeOptions }];
 
 const server: Server = {
   plugins: routes,
