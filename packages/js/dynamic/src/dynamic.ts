@@ -1,3 +1,4 @@
+// @ts-nocheck
 // fastify
 import Fastify, { type FastifyInstance } from "fastify";
 import FastifyWebsocket from "@fastify/websocket";
@@ -7,7 +8,7 @@ import autoRoute from "fastify-autoroutes";
 import { websocketHandler } from "./protocols/ws";
 
 // dynamic
-import { DynamicRouteOptions } from "./types";
+import { type DynamicRouteOptions } from "./types";
 
 interface DynamicOptions {
   fileBased?: boolean;
@@ -19,12 +20,14 @@ const dynamic = (options?: DynamicOptions): FastifyInstance => {
   });
 
   app.register(FastifyWebsocket);
-  app.addHook("onRoute", (routeOptions: DynamicRouteOptions) => {
-    if (routeOptions.wsHandler) {
+  app.addHook("onRoute", (routeOptions) => {
+    if (routeOptions.wsHandler != null) {
+      console.log(routeOptions);
       routeOptions.runnerHandler = routeOptions.wsHandler;
       routeOptions.wsHandler = websocketHandler;
-      console.log("test", routeOptions);
     }
+
+    return routeOptions;
   });
 
   app.register(autoRoute, {

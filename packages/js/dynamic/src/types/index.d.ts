@@ -1,11 +1,8 @@
 import type { FastifyRequest } from "fastify";
-import { RouteOptions, RouteOptions } from "@fastify/websocket";
+import { type RequestRouteOptions } from "fastify/types/request";
+import { type WebsocketHandler } from "@fastify/websocket";
 
-// dynamic
-// import { DynamicRouteOptions } from "./resource";
-import { WebsocketHandler } from "@fastify/websocket";
-
-interface DynamicRouteOptions extends <RouteOptions> {
+interface DynamicRouteOptions extends RequestRouteOptions {
   runnerHandler?: any;
   wsHandler?: WebsocketHandler;
 }
@@ -14,8 +11,4 @@ interface DynamicRequest extends FastifyRequest {
   routeOptions: DynamicRouteOptions;
 }
 
-// interface DynamicWebSocketHandler extends WebsocketHandler {
-//     req
-// }
-
-export { DynamicRequest, DynamicRouteOptions };
+export type { DynamicRequest, DynamicRouteOptions };

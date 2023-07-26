@@ -5,10 +5,13 @@ const websocketHandler = async (
   connection: SocketStream,
   request: DynamicRequest
 ) => {
-  const runner = request.routeOptions.runnerHandler;
+  const { routeOptions } = request;
+  const runner = routeOptions.runnerHandler;
   const { socket } = connection;
 
-  socket.on("connections", (event: any) => {
+  console.log("routeOptions", routeOptions);
+
+  socket.on("connected", (event: any) => {
     console.log("connection event:", event);
 
     // TODO: Change with LLM Op
@@ -22,6 +25,13 @@ const websocketHandler = async (
 
   socket.on("message", (data: any) => {
     console.log("data recieved:", data);
+
+    console.log("FOOOOOO", typeof runner);
+    // socket.send(
+    //   JSON.stringify({
+    //     output: runner(),
+    //   })
+    // );
   });
 };
 
