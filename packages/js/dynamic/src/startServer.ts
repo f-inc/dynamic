@@ -1,22 +1,9 @@
-// fastify
-import { type FastifyPluginCallback, type FastifyPluginAsync } from 'fastify';
-
 // dynamic
 import dynamic from './dynamic';
+import type { Server } from './types';
 
 const DEFAULT_HOST: string = process.env.HOST ?? '0.0.0.0';
 const DEFAULT_PORT: number = parseInt(process.env.PORT ?? '8000');
-
-interface Plugins {
-  callback: FastifyPluginCallback | FastifyPluginAsync;
-  options?: any;
-}
-
-interface Server {
-  plugins: Plugins[];
-  host?: string;
-  port?: number;
-}
 
 const DEFAULT_SERVER: Server = {
   plugins: [],
@@ -48,5 +35,3 @@ const startServer = (server?: Server): void => {
 };
 
 export default startServer;
-
-export type { Plugins, Server };
