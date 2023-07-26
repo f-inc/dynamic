@@ -29,9 +29,9 @@ const websocketWrapper: wsWrapperType = (func: any): any => {
   return websocketHandler;
 };
 
-const onRouteWSWrapperOverride = (routeOptions: RouteOptions): void => {
+const onRouteOverride = (routeOptions: RouteOptions): void => {
   if (routeOptions.wsHandler != null)
     routeOptions.wsHandler = websocketWrapper(routeOptions.wsHandler);
 };
 
-export { websocketWrapper, onRouteWSWrapperOverride };
+export { websocketWrapper, onRouteOverride };
