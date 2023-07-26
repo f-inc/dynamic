@@ -1,26 +1,30 @@
 // fastify
-import Fastify, { type FastifyInstance } from 'fastify'
-import FastifyWebsocket from '@fastify/websocket'
+import Fastify, { type FastifyInstance } from 'fastify';
+import FastifyWebsocket from '@fastify/websocket';
 
 // default plugins
-import autoRoute from 'fastify-autoroutes'
+import autoRoute from 'fastify-autoroutes';
+
+// dynamic
+import { onRouteWSWrapperOverride } from './protocols/ws';
 
 interface DynamicOptions {
-  fileBased?: boolean
+  fileBased?: boolean;
 }
 
 const dynamic = (options?: DynamicOptions): FastifyInstance => {
   const app: FastifyInstance = Fastify({
-    logger: true
-  })
+    logger: true,
+  });
 
-  app.register(FastifyWebsocket)
+  app.addHook('onRoute', onRouteWSWrapperOverride);
+  app.register(FastifyWebsocket);
 
   app.register(autoRoute, {
-    dir: './../routes'
-  })
+    dir: './../routes',
+  });
 
-  return app
-}
+  return app;
+};
 
-export default dynamic
+export default dynamic;
