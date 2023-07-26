@@ -1,4 +1,5 @@
-import startServer, { Plugins, Server } from "../../dynamic/src/startServer";
+import startServer from "../../dynamic/src/startServer";
+import { Plugins, Server } from "./../../dynamic/src/types";
 
 /**
  * Without Plugins
