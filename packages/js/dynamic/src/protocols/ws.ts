@@ -1,19 +1,33 @@
 import { FastifyRequest } from "fastify";
-import type { SocketStream } from "@fastify/websocket";
+import type { RouteOptions, SocketStream } from "@fastify/websocket";
 
-const websocketHandler = async (
-  connection: SocketStream,
-  request: FastifyRequest
-) => {
-  const { socket } = connection;
+const websocketWrapper = (func: any) => {
+  const websocketHandler = async (
+    connection: SocketStream,
+    request: FastifyRequest
+  ) => {
+    const { socket } = connection;
 
-  socket.on("connections", (event: any) => {
-    console.log("connection event:", event);
-  });
+    socket.on("open", (event: any) => {
+      console.log("connection event:", event);
+    });
 
-  socket.on("message", (data: any) => {
-    console.log("data recieved:", data);
-  });
+    socket.on("message", async (data: any) => {
+      console.log("data recieved:", data.toString());
+      socket.send(
+        JSON.stringify({
+          output: await func(),
+        })
+      );
+    });
+  };
+
+  return websocketHandler;
 };
 
-export { websocketHandler };
+const onRouteWSWrapperOverride = (routeOptions: RouteOptions) => {
+  if (routeOptions.wsHandler)
+    routeOptions.wsHandler = websocketWrapper(routeOptions.wsHandler);
+};
+
+export { websocketWrapper, onRouteWSWrapperOverride };
