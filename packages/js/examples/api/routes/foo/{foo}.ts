@@ -14,11 +14,15 @@ interface FooRequest extends FastifyRequest {
   params: FooParams;
   body: FooBody;
 }
+
+const exampleWSHandler = async () => 1 + 1;
+
 export default (fastify: FastifyInstance) =>
   <Resource>{
     get: {
       handler: async (request: FooRequest, reply: FastifyReply) =>
         `Foo Foo ${request.params.foo}!`,
+      wsHandler: exampleWSHandler,
     },
     put: {
       handler: async (request: FooRequest, reply: FastifyReply) =>
