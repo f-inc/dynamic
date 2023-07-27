@@ -6,6 +6,7 @@ import {
 import { BaseLanguageModel } from 'langchain/dist/base_language';
 import { BaseCallbackHandler, NewTokenIndices } from 'langchain/dist/callbacks';
 import { Tool } from 'langchain/dist/tools/base';
+import { ServerMessage } from '../../types';
 
 export class DynamicAgent {
   tools: Tool[];
@@ -47,6 +48,9 @@ export class WebSocketCallbackHandler extends BaseCallbackHandler {
     parentRunId?: string | undefined,
     tags?: string[] | undefined
   ): Promise<void> {
-    this.websocket.send(token);
+    const message: ServerMessage = {
+      content: token,
+    };
+    this.websocket.send(JSON.stringify(message));
   }
 }
