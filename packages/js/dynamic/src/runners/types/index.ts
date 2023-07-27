@@ -1,5 +1,5 @@
 export interface Config {
-  input: any;
+  input: object;
 }
 
 export abstract class Runner {
