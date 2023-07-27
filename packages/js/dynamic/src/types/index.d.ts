@@ -1,1 +1,2 @@
-export type { Server, Plugins } from './server';
+export type * from './server';
+export type * from './message';
