@@ -1,1 +1,1 @@
-export { ChainRunner } from './ChainRunner';
+export { ChainRunner } from './chain';
