@@ -1,4 +1,4 @@
-import { Config } from '../types';
+import { type Config } from '../types';
 import { CallableRunner } from '..';
 
 const add = ({ a, b }: { a: number; b: number }): number => a + b;
