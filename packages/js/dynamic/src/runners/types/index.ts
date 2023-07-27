@@ -1,17 +1,17 @@
 export interface Config {
-  input: object;
+  input: object | string;
 }
 
 export abstract class Runner {
   config: Config;
   handle: any;
 
-  constructor(config: Config, handle: any) {
+  constructor(handle: any, config: Config) {
     this.config = config;
     this.handle = handle;
   }
 
-  abstract run(): void;
+  abstract run(): any;
 
-  abstract arun(): Promise<void>;
+  abstract arun(): any;
 }

@@ -4,7 +4,7 @@ class CallableRunner extends Runner {
   constructor(handle: any, config: Config) {
     super(config, handle);
   }
-  run(): void {
+  run(): any {
     const { config, handle } = this;
     return handle(config.input);
   }
