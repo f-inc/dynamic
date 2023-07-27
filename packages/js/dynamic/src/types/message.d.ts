@@ -1,10 +1,12 @@
+import { Config } from '../runners/types';
+
 export interface BaseMessage {
   id?: string;
   content: string;
 }
 
 export interface ClientMessage extends BaseMessage {
-  config: any;
+  config: Config;
 }
 
 export interface ServerMessage extends BaseMessage {}
