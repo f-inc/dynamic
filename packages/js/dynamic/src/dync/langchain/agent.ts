@@ -4,12 +4,9 @@ import {
   initializeAgentExecutorWithOptions,
   type AgentExecutor,
 } from 'langchain/agents';
-import { type BaseLanguageModel } from 'langchain/dist/base_language';
-import {
-  BaseCallbackHandler,
-  type NewTokenIndices,
-} from 'langchain/dist/callbacks';
-import { type Tool } from 'langchain/dist/tools/base';
+import { type BaseLanguageModel } from 'langchain/base_language';
+import { BaseCallbackHandler, type NewTokenIndices } from 'langchain/callbacks';
+import type { Tool } from 'langchain/tools';
 import { type ServerMessage } from '../../types';
 
 export class DynamicAgent {
