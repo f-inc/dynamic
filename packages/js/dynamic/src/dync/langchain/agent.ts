@@ -1,12 +1,16 @@
 // langchain
 import {
-  InitializeAgentExecutorOptions,
+  type InitializeAgentExecutorOptions,
   initializeAgentExecutorWithOptions,
+  type AgentExecutor,
 } from 'langchain/agents';
-import { BaseLanguageModel } from 'langchain/dist/base_language';
-import { BaseCallbackHandler, NewTokenIndices } from 'langchain/dist/callbacks';
-import { Tool } from 'langchain/dist/tools/base';
-import { ServerMessage } from '../../types';
+import { type BaseLanguageModel } from 'langchain/dist/base_language';
+import {
+  BaseCallbackHandler,
+  type NewTokenIndices,
+} from 'langchain/dist/callbacks';
+import { type Tool } from 'langchain/dist/tools/base';
+import { type ServerMessage } from '../../types';
 
 export class DynamicAgent {
   tools: Tool[];
@@ -23,8 +27,8 @@ export class DynamicAgent {
     this.options = options;
   }
 
-  initAgentWithWebSocket(socket: WebSocket) {
-    return initializeAgentExecutorWithOptions(
+  async initAgentWithWebSocket(socket: WebSocket): Promise<AgentExecutor> {
+    return await initializeAgentExecutorWithOptions(
       this.tools,
       this.llm,
       this.options

@@ -12,30 +12,29 @@ export class AgentRunner extends Runner {
     streaming?: boolean
   ) {
     super(handle, config);
+    this.streaming = streaming ?? false;
     if (!(handle instanceof DynamicAgent)) {
       throw new Error(
         `"handle" expected DynamicAgent, recieved ${typeof handle}`
       );
     }
-    if (streaming) {
-      if (!websocket) {
+    if (this.streaming) {
+      if (websocket == null) {
         throw new Error(
           'DynamicAgent marked as `streaming` without a websocket.'
         );
       }
       this.handle = handle.initAgentWithWebSocket(websocket);
       this.streaming = true;
-    } else {
-      this.streaming = false;
     }
   }
 
-  run() {
+  run(): any {
     const { input } = this.config;
     return this.handle.run(input);
   }
 
-  async arun() {
+  async arun(): Promise<any> {
     if (!this.streaming) {
       throw new Error(
         'This is not a streaming agent, please use run() and not arun().'
@@ -43,6 +42,6 @@ export class AgentRunner extends Runner {
     }
 
     const { input } = this.config;
-    return await this.handle.arun(input);
+    return this.handle.arun(input);
   }
 }

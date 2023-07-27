@@ -1,4 +1,4 @@
-import { Config } from '../runners/types';
+import { type Config } from '../runners/types';
 
 export interface BaseMessage {
   id?: string;
