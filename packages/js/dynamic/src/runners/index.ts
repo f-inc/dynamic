@@ -1,10 +1,6 @@
-import { Runner, type Config } from './types';
+import { Runner } from './types';
 
 class CallableRunner extends Runner {
-  constructor(handle: any, config: Config) {
-    super(handle, config);
-  }
-
   run(): any {
     const { config, handle } = this;
     return handle(config.input);

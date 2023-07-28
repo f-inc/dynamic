@@ -4,14 +4,11 @@
  */
 import 'dotenv/config';
 
-import { Config } from '../types';
+import { type Config } from '../types';
 import { AgentRunner } from '../langchain';
 
-import { OpenAI, PromptTemplate } from 'langchain';
-import {
-  AgentExecutor,
-  initializeAgentExecutorWithOptions,
-} from 'langchain/agents';
+import { OpenAI } from 'langchain';
+import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { SerpAPI } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
 

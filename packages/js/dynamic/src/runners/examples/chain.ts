@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import { Config } from '../types';
+import { type Config } from '../types';
 import { ChainRunner } from '../langchain';
 
 import { LLMChain, OpenAI, PromptTemplate } from 'langchain';
@@ -27,4 +27,6 @@ const config: Config = { input };
 const runner: ChainRunner = new ChainRunner(chain, config);
 
 console.log('Runner created and running...');
-runner.run().then((output: any) => console.log('Runner Output: ', output));
+runner.run().then((output: any) => {
+  console.log('Runner Output: ', output);
+});
