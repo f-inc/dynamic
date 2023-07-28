@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { startServer } from "../../dynamic";
 import { Plugins, Server } from "./../../dynamic/src/types";
 
