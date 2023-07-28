@@ -6,7 +6,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Resource } from "fastify-autoroutes";
 
 // langchain
-import { type Tool } from "langchain/dist/tools/base";
+import { type Tool } from "langchain/tools";
 import { OpenAI } from "langchain/llms/openai";
 import { SerpAPI } from "langchain/tools";
 import { Calculator } from "langchain/tools/calculator";
@@ -15,6 +15,8 @@ import { Calculator } from "langchain/tools/calculator";
 
 const model = new OpenAI({
   temperature: 0,
+  streaming: true,
+  verbose: true,
 });
 const tools: Tool[] = [
   new SerpAPI(undefined, {

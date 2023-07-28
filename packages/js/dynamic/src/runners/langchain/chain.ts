@@ -2,7 +2,7 @@
 import { Runner, type Config } from '../types';
 
 // langchain
-import { BaseChain } from 'langchain/dist/chains/base';
+import { BaseChain } from 'langchain/chains';
 
 export class ChainRunner extends Runner {
   constructor(handle: BaseChain, config: Config) {
