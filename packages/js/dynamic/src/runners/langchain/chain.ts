@@ -13,7 +13,7 @@ export class ChainRunner extends Runner {
     super(handle, config);
   }
 
-  run(): void {
+  run(): any {
     const { input } = this.config;
     return this.handle.run(input);
   }
