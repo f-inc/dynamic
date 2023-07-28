@@ -25,6 +25,15 @@ export class DynamicAgent {
   }
 
   async initAgentWithWebSocket(socket: WebSocket): Promise<AgentExecutor> {
+    if (!('streaming' in this.llm)) {
+      throw new Error(
+        'LLM has not been declared as streaming, make sure you add the `streaming` option to your llm instance, if possible.'
+      );
+    }
+
+    const wsCallbackHandler = new WebSocketCallbackHandler(socket);
+    this.llm.callbacks = [wsCallbackHandler];
+
     return await initializeAgentExecutorWithOptions(
       this.tools,
       this.llm,
