@@ -2,7 +2,7 @@ import { Runner, type Config } from './types';
 
 class CallableRunner extends Runner {
   constructor(handle: any, config: Config) {
-    super(config, handle);
+    super(handle, config);
   }
 
   run(): any {

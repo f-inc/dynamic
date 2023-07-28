@@ -1,3 +1,4 @@
+// Run "tsc callable.ts && node callable.js"
 import { type Config } from '../types';
 import { CallableRunner } from '..';
 

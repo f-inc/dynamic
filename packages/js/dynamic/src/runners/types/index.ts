@@ -7,8 +7,8 @@ export abstract class Runner {
   handle: any;
 
   constructor(handle: any, config: Config) {
-    this.config = config;
     this.handle = handle;
+    this.config = config;
   }
 
   abstract run(): any;
