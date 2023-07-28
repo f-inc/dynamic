@@ -3,15 +3,15 @@ import 'dotenv/config';
 import { Config } from '../types';
 import { ChainRunner } from '../langchain';
 
-// import { LLMChain, OpenAI, PromptTemplate } from 'langchain';
-import { LLMChain } from 'langchain/chains';
-import { OpenAI } from 'langchain/llms';
-import { PromptTemplate } from 'langchain/prompts';
+import { LLMChain, OpenAI, PromptTemplate } from 'langchain';
+// import { LLMChain } from 'langchain/chains';
+// import { OpenAI } from 'langchain/llms';
+// import { PromptTemplate } from 'langchain/prompts';
 
 // Langchain Setup
 const llm = new OpenAI({
   temperature: 0,
-  //   verbose: true,
+  verbose: true,
 });
 
 const prompt = PromptTemplate.fromTemplate(
