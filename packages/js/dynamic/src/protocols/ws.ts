@@ -1,6 +1,8 @@
 import { type FastifyRequest } from 'fastify';
 import type { RouteOptions, SocketStream } from '@fastify/websocket';
 
+import { ServerMessage, ErrorMessage } from '../types';
+
 type wsWrapperType = (
   f: any
 ) => (conn: SocketStream, request: FastifyRequest) => Promise<void>;
@@ -12,18 +14,46 @@ const websocketWrapper: wsWrapperType = (func: any): any => {
   ): Promise<void> => {
     const { socket } = connection;
 
-    socket.on('open', (event: any) => {
-      console.log('connection event:', event);
-    });
+    socket.onopen = async (event: any) => {
+      console.log('connection event:', event.type);
+    };
 
-    socket.on('message', async (data: any) => {
-      console.log('data recieved:', data.toString());
-      socket.send(
-        JSON.stringify({
-          output: await func(),
-        })
+    socket.onclose = async (event: CloseEvent) => {
+      // TODO: Connection Mangager close handling
+      console.log(
+        `Closing socket (code=${event.code}), (wasClean=${event.wasClean}) 
+        ${event.reason ? `\nReason: ${event.reason}` : ''}`
       );
-    });
+    };
+
+    socket.onmessage = async (event: MessageEvent) => {
+      const { data } = event;
+
+      let input = null;
+      try {
+        input = JSON.parse(data);
+      } catch (e: unknown) {
+        if (e instanceof SyntaxError) {
+          const errMsg =
+            'Dynamic Websocket will only take JSON parseable data.';
+          const error: ErrorMessage = {
+            error: e.toString(),
+            content: errMsg,
+          };
+
+          console.warn(errMsg);
+          socket.send(JSON.stringify(error));
+        }
+        return;
+      }
+      console.log('data recieved:', input);
+
+      // socket.send(
+      //   JSON.stringify({
+      //     output: await func(),
+      //   })
+      // );
+    };
   };
 
   return websocketHandler;
