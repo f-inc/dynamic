@@ -1,9 +1,5 @@
-// dynamic
 import { DynamicAgent } from "./../../../dynamic/src/dync/langchain/agent";
-
-// fastify
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Resource } from "fastify-autoroutes";
+import { wsRouteBuilder } from "./../../../dynamic/src/routing";
 
 // langchain
 import { type Tool } from "langchain/tools";
@@ -27,19 +23,9 @@ const tools: Tool[] = [
   new Calculator(),
 ];
 
-const agentHandler = async () => {
-  return new DynamicAgent(tools, model, {
-    agentType: "zero-shot-react-description",
-    verbose: true,
-  });
-};
+const agent = new DynamicAgent(tools, model, {
+  agentType: "zero-shot-react-description",
+  verbose: true,
+});
 
-/** Define Route */
-
-export default (fastify: FastifyInstance) =>
-  <Resource>{
-    get: {
-      handler: () => null,
-      wsHandler: agentHandler,
-    },
-  };
+export default wsRouteBuilder(agent);
