@@ -8,8 +8,9 @@ import { type BaseLanguageModel } from 'langchain/base_language';
 import { BaseCallbackHandler, type NewTokenIndices } from 'langchain/callbacks';
 import type { Tool } from 'langchain/tools';
 import { type ServerMessage } from '../../types';
+import BaseDync from '..';
 
-export class DynamicAgent {
+export class DynamicAgent extends BaseDync {
   tools: Tool[];
   llm: BaseLanguageModel;
   options: InitializeAgentExecutorOptions;
@@ -19,6 +20,7 @@ export class DynamicAgent {
     llm: BaseLanguageModel,
     options: InitializeAgentExecutorOptions
   ) {
+    super();
     this.tools = tools;
     this.llm = llm;
     this.options = options;
