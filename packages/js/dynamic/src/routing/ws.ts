@@ -12,6 +12,7 @@ const routeTemplate = (wsHandler: any) => {
   return (fastify: FastifyInstance) =>
     ({
       get: {
+        dynamic: true,
         handler: () => null,
         wsHandler,
       },

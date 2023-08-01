@@ -2,12 +2,17 @@ import { type FastifyRequest } from 'fastify';
 import type { RouteOptions, SocketStream } from '@fastify/websocket';
 
 import { ServerMessage, ErrorMessage } from '../types';
+import { DynamicAgent } from '../dync/langchain/agent';
+import { AgentRunner } from '../runners/langchain';
+import { Config } from '../runners/types';
+
+type GetDyncType = () => Promise<DynamicAgent>;
 
 type wsWrapperType = (
-  f: any
+  f: GetDyncType
 ) => (conn: SocketStream, request: FastifyRequest) => Promise<void>;
 
-const websocketWrapper: wsWrapperType = (func: any): any => {
+const websocketWrapper: wsWrapperType = (getDync) => {
   const websocketHandler = async (
     connection: SocketStream,
     request: FastifyRequest
@@ -60,8 +65,10 @@ const websocketWrapper: wsWrapperType = (func: any): any => {
 };
 
 const onRouteOverride = (routeOptions: RouteOptions): void => {
-  if (routeOptions.wsHandler != null)
-    routeOptions.wsHandler = websocketWrapper(routeOptions.wsHandler);
+  if (routeOptions.wsHandler != null && 'dynamic' in routeOptions)
+    routeOptions.wsHandler = websocketWrapper(
+      routeOptions.wsHandler as GetDyncType
+    );
 };
 
 export { websocketWrapper, onRouteOverride };
