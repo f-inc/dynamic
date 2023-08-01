@@ -51,7 +51,6 @@ const websocketWrapper: wsWrapperType = (getDync) => {
         }
         return;
       }
-      console.log('data recieved:', input);
       const config: Config = input;
       const dync = await getDync();
       const runner = new AgentRunner(dync, config, socket, true);
