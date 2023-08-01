@@ -15,8 +15,8 @@ const model = new OpenAI({
   verbose: true,
 });
 const tools: Tool[] = [
-  new SerpAPI(undefined, {
-    location: "San Francisco, California, USA",
+  new SerpAPI(process.env.SERPAPI_API_KEY, {
+    location: "San Francisco",
     hl: "en",
     gl: "us",
   }),
