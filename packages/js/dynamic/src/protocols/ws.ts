@@ -52,12 +52,16 @@ const websocketWrapper: wsWrapperType = (getDync) => {
         return;
       }
       console.log('data recieved:', input);
+      const config: Config = input;
+      const dync = await getDync();
+      const runner = new AgentRunner(dync, config, socket, true);
 
-      // socket.send(
-      //   JSON.stringify({
-      //     output: await func(),
-      //   })
-      // );
+      runner.arun().then((content) => {
+        const message: ServerMessage = {
+          content,
+        };
+        socket.send(JSON.stringify(message));
+      });
     };
   };
 

@@ -4,6 +4,7 @@ import { DynamicAgent } from '../../dync/langchain/agent';
 import { type AgentExecutor } from 'langchain/agents';
 
 export class AgentRunner extends Runner {
+  websocket?: WebSocket;
   streaming: boolean; // marker to indicate agent will stream its tokens
 
   constructor(
@@ -15,9 +16,9 @@ export class AgentRunner extends Runner {
     super(handle, config);
     this.streaming = streaming ?? false;
     if (this.streaming) {
-      if (!(handle instanceof DynamicAgent)) {
+      if (!(this.handle instanceof DynamicAgent)) {
         throw new Error(
-          `"handle" expected DynamicAgent, recieved ${typeof handle}`
+          `"handle" expected DynamicAgent, recieved ${typeof this.handle}`
         );
       }
       if (websocket == null) {
@@ -25,8 +26,8 @@ export class AgentRunner extends Runner {
           'DynamicAgent marked as `streaming` without a websocket.'
         );
       }
-      this.handle = handle.initAgentWithWebSocket(websocket);
       this.streaming = true;
+      this.websocket = websocket;
     }
   }
 
@@ -36,13 +37,15 @@ export class AgentRunner extends Runner {
   }
 
   async arun(): Promise<any> {
-    if (!this.streaming) {
+    const { streaming, websocket } = this;
+    if (!(websocket && streaming) || !(this.handle instanceof DynamicAgent)) {
       throw new Error(
         'This is not a streaming agent, please use run() and not arun().'
       );
     }
+    const handle = await this.handle.initAgentWithWebSocket(websocket);
 
     const { input } = this.config;
-    return this.handle.arun(input);
+    return await handle.run(input);
   }
 }
