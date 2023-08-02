@@ -49,6 +49,14 @@
   dependencies:
     fast-json-stringify "^5.7.0"
 
+"@fastify/websocket@^8.0.0":
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/@fastify/websocket/-/websocket-8.2.0.tgz#2f5785a88e8188bff9cc17821d5d3d09458a6714"
+  integrity sha512-B4tlHFBKCX7tenEG9aUcQEpksW2e0+dgRTaH/05+cro1Xsq1+kSj+9IB9Gep7a0KbHZGrat+zBsOas6lRs5dFQ==
+  dependencies:
+    fastify-plugin "^4.0.0"
+    ws "^8.0.0"
+
 "@jridgewell/resolve-uri@^3.0.3":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@jridgewell/resolve-uri/-/resolve-uri-3.1.1.tgz#c08679063f279615a3326583ba3a90d1d82cc721"
@@ -387,6 +395,15 @@ dotenv@^16.3.1:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.3.1.tgz#369034de7d7e5b120972693352a3bf112172cc3e"
   integrity sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==
 
+"dynamic@file:../../dynamic":
+  version "0.0.1"
+  dependencies:
+    "@fastify/websocket" "^8.0.0"
+    fastify "^4.17.0"
+    fastify-autoroutes "^3.0.2"
+    fastify-websocket "^4.3.0"
+    langchain "^0.0.113"
+
 event-target-shim@^5.0.0:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-5.0.1.tgz#5d4d3ebdf9583d63a5333ce2deb7480ab2b05789"
@@ -460,10 +477,31 @@ fastify-autoroutes@^3.0.2:
     fastify-plugin "^4.0.0"
     glob-promise "^4.2.2"
 
+fastify-plugin@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/fastify-plugin/-/fastify-plugin-3.0.1.tgz#79e84c29f401020f38b524f59f2402103fd21ed2"
+  integrity sha512-qKcDXmuZadJqdTm6vlCqioEbyewF60b/0LOFCcYN1B6BIZGlYJumWWOYs70SFYLDAH4YqdE1cxH/RKMG7rFxgA==
+
 fastify-plugin@^4.0.0, fastify-plugin@^4.5.1:
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/fastify-plugin/-/fastify-plugin-4.5.1.tgz#44dc6a3cc2cce0988bc09e13f160120bbd91dbee"
   integrity sha512-stRHYGeuqpEZTL1Ef0Ovr2ltazUT9g844X5z/zEBFLG8RYlpDiOCIG+ATvYEp+/zmc7sN29mcIMp8gvYplYPIQ==
+
+"fastify-websocket-deprecated@npm:fastify-websocket@4.2.2":
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/fastify-websocket/-/fastify-websocket-4.2.2.tgz#7fba0edee66d1d056ee900a4e58c8b5fd6af5ef0"
+  integrity sha512-Cx4CZwercvoPq4fc6f09VAoa3wqp9qOQUDHp8wMkCHau4zw7wGa+C3Oi2QNUvhvNqw6N4mH8WWYLEnGXUlnumg==
+  dependencies:
+    fastify-plugin "^3.0.0"
+    ws "^8.0.0"
+
+fastify-websocket@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/fastify-websocket/-/fastify-websocket-4.3.0.tgz#0eec382f4677886f62ae40d695f4f1f122d26dbf"
+  integrity sha512-PLoXjlKHaWOEIJ7tHStM2i8aL4kdYVB8d1Umf7TdpQ93kG7OopO7eV4IAyO545kRiE8pyL1AbjlJeZ7irDA1aA==
+  dependencies:
+    fastify-websocket-deprecated "npm:fastify-websocket@4.2.2"
+    process-warning "^1.0.0"
 
 fastify@^4.17.0:
   version "4.21.0"
@@ -924,6 +962,11 @@ pino@^8.12.0:
     sonic-boom "^3.1.0"
     thread-stream "^2.0.0"
 
+process-warning@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/process-warning/-/process-warning-1.0.0.tgz#980a0b25dc38cd6034181be4b7726d89066b4616"
+  integrity sha512-du4wfLyj4yCZq1VupnVSZmRsPJsNuxoDQFdCFHLaYiEbFBD7QE0a+I4D7hOxrVnh78QE/YipFAj9lXHiXocV+Q==
+
 process-warning@^2.0.0, process-warning@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/process-warning/-/process-warning-2.2.0.tgz#008ec76b579820a8e5c35d81960525ca64feb626"
@@ -1166,6 +1209,11 @@ whatwg-url@^5.0.0:
   dependencies:
     tr46 "~0.0.3"
     webidl-conversions "^3.0.0"
+
+ws@^8.0.0:
+  version "8.13.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.13.0.tgz#9a9fb92f93cf41512a0735c8f4dd09b8a1211cd0"
+  integrity sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==
 
 yallist@^4.0.0:
   version "4.0.0"

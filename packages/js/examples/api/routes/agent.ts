@@ -1,5 +1,5 @@
-import { DynamicAgent } from "./../../../dynamic/src/dync/langchain/agent";
-import { wsRouteBuilder } from "./../../../dynamic/src/routing";
+import { DynamicAgent } from "dynamic/src/dync/langchain/agent";
+import { wsRouteBuilder } from "dynamic/src/routing";
 
 // langchain
 import { type Tool } from "langchain/tools";
