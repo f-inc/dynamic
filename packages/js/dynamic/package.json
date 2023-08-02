@@ -1,16 +1,21 @@
 {
-  "name": "dynamic.js",
-  "version": "1.0.0",
-  "description": "LLM API server framework",
+  "name": "dynamic",
+  "version": "0.0.1",
+  "description": "LLM Web Framework. Build production ready LLM-apps.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/f-inc/dynamic"
+  },
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
     "lint": "eslint . --ext .ts",
     "fix": "eslint . --ext .ts --fix"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["LLM", "OpenAI", "langchain"],
+  "author": "f.inc",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^18.16.3",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
