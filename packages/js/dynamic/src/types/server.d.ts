@@ -1,13 +1,13 @@
 // fastify
 import type { FastifyPluginCallback, FastifyPluginAsync } from 'fastify';
 
-export interface Plugins {
+export interface Plugin {
   callback: FastifyPluginCallback | FastifyPluginAsync;
   options?: any;
 }
 
 export interface Server {
-  plugins: Plugins[];
+  plugins: Plugin[];
   host?: string;
   port?: number;
 }
